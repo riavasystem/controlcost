@@ -428,7 +428,7 @@ export default function LandingPage() {
             cómo Comunidad Inteligente PRO puede transformar tu condominio.
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap", marginBottom: 60 }}>
-            <a href="mailto:claudiocastro98@gmail.com" className="cip-btn-primary">
+            <a href="mailto:claudio.castro@riava.cl" className="cip-btn-primary">
               <i className="fa-solid fa-envelope" />
               Solicitar Demo
             </a>
@@ -446,16 +446,14 @@ export default function LandingPage() {
               <div className="contacto">
                 +56 9 6209 9949
                 <br />
-                claudiocastro98@gmail.com
+                claudio.castro@riava.cl
               </div>
-              <div className="provisorio">(correo provisorio)</div>
             </div>
             <div className="cip-equipo-card">
-              <div className="cip-equipo-avatar">CS</div>
-              <h3>Carlos Soto Llancafil</h3>
+              <div className="cip-equipo-avatar">RC</div>
+              <h3>Richard Chamorro Huircan</h3>
               <div className="cargo">Business Manager &amp; Co-Fundador</div>
-              <div className="contacto">carlos.soto.llancafil@gmail.com</div>
-              <div className="provisorio">(correo provisorio)</div>
+              <div className="contacto">contacto@riava.cl</div>
             </div>
           </div>
         </div>

@@ -3,7 +3,8 @@ export type Unidad = {
   condominio_id: string;
   numero: string;
   torre: string | null;
-  metraje: number | null;
+  /** FastAPI serializa Decimal como string (ej. "55.50"), no como number. */
+  metraje: string | null;
   total_residentes: number;
 };
 

@@ -89,7 +89,7 @@ export default function UnidadesPage() {
 
   function editar(unidad: Unidad) {
     setEditandoId(unidad.id);
-    setForm({ numero: unidad.numero, torre: unidad.torre ?? "", metraje: unidad.metraje != null ? String(unidad.metraje) : "" });
+    setForm({ numero: unidad.numero, torre: unidad.torre ?? "", metraje: unidad.metraje ?? "" });
   }
 
   function cancelarEdicion() {

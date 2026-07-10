@@ -16,11 +16,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Comunidad Inteligente PRO — ERP SaaS para Condominios en Chile",
+  title: "Control Cost Pro — ERP SaaS para Condominios en Chile",
   description:
     "ERP SaaS para la administración inteligente de condominios y edificios en Chile. Cumplimiento Ley N°21.442, 20+ módulos integrados, disponible 24/7.",
   openGraph: {
-    title: "Comunidad Inteligente PRO — ERP SaaS para Condominios en Chile",
+    title: "Control Cost Pro — ERP SaaS para Condominios en Chile",
     description:
       "Tecnología enterprise, cumplimiento Ley N°21.442 y automatización total para la administración de condominios.",
   },
@@ -161,10 +161,10 @@ export default function LandingPage() {
               color: "#040C1A",
             }}
           >
-            CI
+            CC
           </div>
           <span>
-            Comunidad Inteligente <em>PRO</em>
+            Control Cost <em>Pro</em>
           </span>
         </div>
         <ul className="cip-nav-links">
@@ -203,9 +203,9 @@ export default function LandingPage() {
           </div>
 
           <h1>
-            Comunidad
+            Control Cost
             <br />
-            Inteligente <em>PRO</em>
+            <em>Pro</em>
           </h1>
 
           <p className="cip-hero-sub">
@@ -385,7 +385,7 @@ export default function LandingPage() {
                 <th>Característica</th>
                 <th>Excel / Manual</th>
                 <th>Software Genérico</th>
-                <th className="highlight">Comunidad Inteligente PRO</th>
+                <th className="highlight">Control Cost Pro</th>
               </tr>
             </thead>
             <tbody>
@@ -425,7 +425,7 @@ export default function LandingPage() {
           </h2>
           <p className="cip-section-sub" style={{ margin: "0 auto 40px", textAlign: "center" }}>
             Únete a la transformación digital de la copropiedad en Chile. Solicita una demo y descubre
-            cómo Comunidad Inteligente PRO puede transformar tu condominio.
+            cómo Control Cost Pro puede transformar tu condominio.
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap", marginBottom: 60 }}>
             <a href="mailto:claudio.castro@riava.cl" className="cip-btn-primary">
@@ -462,9 +462,9 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer className="cip-footer">
         <div className="brand">
-          Comunidad Inteligente <em>PRO</em>
+          Control Cost <em>Pro</em>
         </div>
-        <div className="legal">© {new Date().getFullYear()} Comunidad Inteligente PRO — Todos los derechos reservados</div>
+        <div className="legal">© {new Date().getFullYear()} Control Cost Pro — Todos los derechos reservados</div>
         <div className="version">Versión Executive 2026</div>
       </footer>
     </main>

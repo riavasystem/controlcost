@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Space_Grotesk, Inter } from "next/font/google";
+import { ScrollReveal } from "./scroll-reveal";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
@@ -15,234 +16,459 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ControlCost — Gestión moderna de condominios",
+  title: "Comunidad Inteligente PRO — ERP SaaS para Condominios en Chile",
   description:
-    "Administra residentes, unidades, gastos comunes, RRHH y comunicados de tu condominio desde un solo panel, sin planillas ni papeles.",
+    "ERP SaaS para la administración inteligente de condominios y edificios en Chile. Cumplimiento Ley N°21.442, 20+ módulos integrados, disponible 24/7.",
   openGraph: {
-    title: "ControlCost — Gestión moderna de condominios",
-    description: "El panel de administración para condominios que reemplaza planillas, WhatsApp y papel.",
+    title: "Comunidad Inteligente PRO — ERP SaaS para Condominios en Chile",
+    description:
+      "Tecnología enterprise, cumplimiento Ley N°21.442 y automatización total para la administración de condominios.",
   },
 };
 
-type Modulo = {
-  titulo: string;
-  detalle: string;
-  estado: "disponible" | "proximamente";
-};
+const MODULOS: Array<[string, string, string]> = [
+  ["fa-chart-line", "Dashboard Ejecutivo", "KPIs, flujo de caja y alertas en tiempo real."],
+  ["fa-users", "Residentes", "Registro completo de propietarios y arrendatarios."],
+  ["fa-building", "Gastos Comunes", "Cobro por m² configurable con extraordinarios."],
+  ["fa-money-bill-wave", "Registro de Pagos", "Canal de pago con reversión inteligente."],
+  ["fa-coins", "Finanzas", "Ingresos y egresos con trazabilidad completa."],
+  ["fa-file-invoice-dollar", "Contabilidad", "Balance, IVA y fondo de reserva automático."],
+  ["fa-user-tie", "RR.HH.", "Personal, contratos y libro de remuneraciones PDF."],
+  ["fa-gavel", "Multas", "Infracciones con ingreso automático al registrar."],
+  ["fa-bullhorn", "Comunicados", "Avisos con prioridad: normal, importante, urgente."],
+  ["fa-clock", "Control Visitas", "Registro entrada/salida con alerta de +8 horas."],
+  ["fa-car-side", "Vehículos", "Padrón maestro vinculado a cada unidad."],
+  ["fa-box-open", "Encomiendas", "Ciclo llegada → notificación → retiro."],
+  ["fa-shield-halved", "Guardias", "Turnos y horarios del personal de seguridad."],
+  ["fa-screwdriver-wrench", "Proveedores", "Directorio de servicios externos."],
+  ["fa-scale-balanced", "Ley 21.442", "Cumplimiento normativo completo."],
+  ["fa-credit-card", "Pagos Online", "Webpay integrado para residentes."],
+  ["fa-mobile-alt", "App Móvil", "Portal del residente desde su celular."],
+  ["fa-robot", "Asistente IA", "Consultas conversacionales sobre el estado."],
+  ["fa-clipboard-list", "Reportes", "Informes para juntas de copropietarios."],
+  ["fa-layer-group", "Multi-Condominio", "Una cuenta, múltiples comunidades."],
+];
 
-const MODULOS: Modulo[] = [
+const LEY_CARDS: Array<[string, string, string]> = [
+  [
+    "fa-scale-balanced",
+    "Art. 20 N°4 — Recaudación y Contabilidad",
+    "El sistema registra todos los pagos, lleva contabilidad del fondo común y emite reportes financieros auditables por período conforme a la ley.",
+  ],
+  [
+    "fa-file-invoice",
+    "Certificados de Deuda Descargables",
+    "Generación de comprobantes y cupones de pago en PDF para cada copropietario, con desglose detallado del cobro mensual.",
+  ],
+  [
+    "fa-clipboard-list",
+    "Registro de Copropietarios",
+    "Padrón actualizado de propietarios y arrendatarios conforme al Reglamento DS N°7-2025, con historial de cambios auditables.",
+  ],
+  [
+    "fa-chart-line",
+    "Rendición de Cuentas Transparente",
+    "Dashboard financiero con ingresos, egresos, balance y fondo de reserva accesible para el comité de administración en tiempo real.",
+  ],
+  [
+    "fa-shield-halved",
+    "Mantenciones y Seguridad",
+    "Registro de proveedores, control de acceso de visitas y vehículos, y gestión de personal de seguridad y conserjería con bitácora digital.",
+  ],
+  [
+    "fa-money-bill-wave",
+    "Gastos Comunes Transparentes",
+    "Cobro por m² configurable por sector, con desglose de base y extraordinarios prorrateados. Cada peso, justificado y auditable.",
+  ],
+];
+
+const FLOW_STEPS: Array<[string, string]> = [
+  ["Generar Cobro", "El admin genera los gastos comunes del período con tarifa $/m² + extraordinarios"],
+  ["Notificación", "El residente recibe aviso de su monto con desglose completo y cupón PDF"],
+  ["Pago", "Paga por transferencia, efectivo o Webpay directo desde su portal"],
+  ["Registro Automático", "El ingreso se registra en Finanzas, Contabilidad y Dashboard al instante"],
+  ["Al Día", 'El estado del copropietario cambia a "Al Día" — cero intervención manual'],
+];
+
+const STACK_CARDS: Array<{
+  color: "blue" | "cyan" | "green" | "amber";
+  icon: string;
+  title: string;
+  desc: string;
+  tag: string;
+}> = [
   {
-    titulo: "Unidades",
-    detalle: "Un registro único por departamento o casa: metraje, torre o sector y estado al día.",
-    estado: "disponible",
+    color: "blue",
+    icon: "fa-bolt",
+    title: "Laravel 11",
+    desc: "Framework PHP enterprise. Arquitectura MVC, Eloquent ORM, API RESTful, autenticación JWT y colas de trabajo asíncronas.",
+    tag: "Backend & API",
   },
   {
-    titulo: "Residentes",
-    detalle: "Propietarios y arrendatarios vinculados a su unidad, con contacto siempre actualizado.",
-    estado: "disponible",
+    color: "cyan",
+    icon: "fa-database",
+    title: "SQL Server",
+    desc: "Base de datos Microsoft enterprise. Transacciones ACID, millones de registros, índices de alta performance y alta disponibilidad.",
+    tag: "Base de Datos",
   },
   {
-    titulo: "Gastos comunes",
-    detalle: "Prorrateo automático por metraje o sector, generado en una sola transacción — sin planillas que se desincronizan.",
-    estado: "proximamente",
+    color: "green",
+    icon: "fa-cloud",
+    title: "Cloud Ready",
+    desc: "Desplegable en Azure, AWS o servidor propio. Escalamiento horizontal, backups automáticos y certificado SSL incluido.",
+    tag: "Infraestructura",
   },
   {
-    titulo: "Multas",
-    detalle: "Registro y trazabilidad de incidencias por unidad, con reverso automático del movimiento financiero asociado.",
-    estado: "proximamente",
+    color: "amber",
+    icon: "fa-mobile-alt",
+    title: "API RESTful",
+    desc: "Arquitectura desacoplada para app móvil, integración con Webpay y conexión con sistemas externos de terceros sin límites.",
+    tag: "Integraciones",
   },
-  {
-    titulo: "RRHH y nómina",
-    detalle: "Liquidaciones de sueldo, tasas previsionales parametrizables y topes legales validados.",
-    estado: "proximamente",
-  },
-  {
-    titulo: "Vehículos y visitas",
-    detalle: "Control de acceso y patentes por unidad, con historial consultable.",
-    estado: "proximamente",
-  },
-  {
-    titulo: "Encomiendas",
-    detalle: "Registro de paquetes recibidos en conserjería y su entrega al residente.",
-    estado: "proximamente",
-  },
-  {
-    titulo: "Comunicados",
-    detalle: "Un solo lugar para avisar a toda la comunidad, con registro de quién lo vio.",
-    estado: "proximamente",
-  },
+];
+
+const COMPARE_ROWS: Array<[string, "cross" | "partial", "cross" | "partial"]> = [
+  ["Trazabilidad financiera automática", "cross", "partial"],
+  ["Cumplimiento Ley N°21.442", "cross", "cross"],
+  ["Tarifa $/m² por sector", "cross", "cross"],
+  ["Reversión inteligente al eliminar", "cross", "cross"],
+  ["Portal del residente + App móvil", "cross", "partial"],
+  ["Laravel 11 + SQL Server enterprise", "cross", "cross"],
+  ["Multi-condominio", "cross", "partial"],
 ];
 
 export default function LandingPage() {
   return (
-    <main className={`${spaceGrotesk.variable} ${inter.variable} landing-theme flex-1`} style={{ fontFamily: "var(--font-body)" }}>
-      <div className="landing-glow" />
-      <div className="landing-grid absolute inset-0" />
-      <div
-        className="landing-orb"
-        style={{
-          width: 320,
-          height: 320,
-          top: "6%",
-          left: "4%",
-          background: "radial-gradient(circle, var(--blue-electric), transparent 70%)",
-        }}
-      />
-      <div
-        className="landing-orb"
-        style={{
-          width: 260,
-          height: 260,
-          top: "38%",
-          right: "6%",
-          background: "radial-gradient(circle, var(--cyan-tech), transparent 70%)",
-          animationDelay: "-4s",
-        }}
-      />
+    <main className={`${spaceGrotesk.variable} ${inter.variable} cip-page`}>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+      <ScrollReveal />
 
-      <div className="relative z-10">
-        <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-7">
-          <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[13px] text-[17px] font-bold"
-              style={{
-                background: "linear-gradient(135deg, var(--blue-electric), var(--cyan-tech))",
-                color: "#06101f",
-                boxShadow: "var(--glow-blue)",
-                fontFamily: "var(--font-display)",
-              }}
-            >
-              CC
-            </div>
-            <div style={{ fontFamily: "var(--font-display)" }}>
-              <div className="text-[19px] font-bold leading-tight tracking-tight">ControlCost</div>
-              <div
-                className="mt-0.5 text-[10.5px] font-semibold tracking-[2.5px]"
-                style={{ color: "var(--cyan-tech-2)" }}
-              >
-                CONDOMINIO INTELIGENTE
-              </div>
-            </div>
+      {/* NAV */}
+      <nav className="cip-nav">
+        <div className="cip-nav-logo">
+          <div
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 10,
+              background: "linear-gradient(135deg,#1A6FE8,#00D4FF)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontFamily: "var(--font-display)",
+              fontWeight: 800,
+              fontSize: 16,
+              color: "#040C1A",
+            }}
+          >
+            CI
           </div>
-          <Link
-            href="/login"
-            className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:border-[var(--cyan-tech)]"
-            style={{ borderColor: "var(--border-strong)", color: "var(--text-primary)" }}
-          >
-            Ingresar al panel
-          </Link>
-        </header>
-
-        <section className="mx-auto flex max-w-6xl flex-col items-start gap-7 px-6 pb-20 pt-14 sm:pt-20">
-          <span
-            className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-bold uppercase tracking-[1.6px]"
-            style={{ borderColor: "var(--border-soft)", color: "var(--cyan-tech)" }}
-          >
-            <span
-              className="landing-live-dot h-1.5 w-1.5 rounded-full"
-              style={{ background: "var(--green-ok)" }}
-            />
-            En producción · Gestión de condominios
+          <span>
+            Comunidad Inteligente <em>PRO</em>
           </span>
+        </div>
+        <ul className="cip-nav-links">
+          <li>
+            <a href="#modulos">Módulos</a>
+          </li>
+          <li>
+            <a href="#ley">Ley 21.442</a>
+          </li>
+          <li>
+            <a href="#tecnologia">Tecnología</a>
+          </li>
+          <li>
+            <a href="#comparativa">Comparativa</a>
+          </li>
+          <li>
+            <Link href="/login">Ingresar</Link>
+          </li>
+          <li>
+            <a href="#contacto" className="cip-nav-cta">
+              Solicitar Demo
+            </a>
+          </li>
+        </ul>
+      </nav>
 
-          <h1
-            className="max-w-3xl text-4xl font-bold leading-[1.1] tracking-tight sm:text-6xl"
-            style={{ fontFamily: "var(--font-display)", textWrap: "balance" }}
-          >
-            El panel que reemplaza las planillas y el WhatsApp del condominio
+      {/* HERO */}
+      <section className="cip-hero">
+        <div className="cip-hero-grid" />
+        <div className="cip-hero-orb" />
+
+        <div className="cip-hero-content">
+          <div className="cip-hero-badge">
+            <i className="fa-solid fa-star" />
+            Versión Executive 2026
+          </div>
+
+          <h1>
+            Comunidad
+            <br />
+            Inteligente <em>PRO</em>
           </h1>
 
-          <p className="max-w-xl text-base leading-relaxed sm:text-lg" style={{ color: "var(--text-secondary)" }}>
-            ControlCost centraliza unidades, residentes, gastos comunes, RRHH y comunicados en un
-            solo lugar — claro para la administración, transparente para los residentes.
+          <p className="cip-hero-sub">
+            ERP SaaS para la administración inteligente de condominios y edificios en Chile. Tecnología
+            enterprise, cumplimiento Ley N°21.442 y automatización total.
           </p>
 
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Link
-              href="/login"
-              className="rounded-xl px-6 py-3.5 text-sm font-bold transition hover:-translate-y-0.5"
-              style={{
-                background: "linear-gradient(135deg, var(--blue-electric), var(--cyan-tech))",
-                color: "#06101f",
-                boxShadow: "var(--glow-blue)",
-                fontFamily: "var(--font-body)",
-              }}
-            >
-              Ingresar al panel →
-            </Link>
-            <a
-              href="#modulos"
-              className="rounded-xl border px-6 py-3.5 text-sm font-semibold transition hover:border-[var(--cyan-tech)]"
-              style={{ borderColor: "var(--border-soft)", color: "var(--text-primary)" }}
-            >
-              Ver módulos
+          <div className="cip-hero-pills">
+            <div className="cip-pill">
+              <i className="fa-solid fa-check" /> Cumplimiento Ley 21.442
+            </div>
+            <div className="cip-pill">
+              <i className="fa-solid fa-check" /> Laravel 11 + SQL Server
+            </div>
+            <div className="cip-pill">
+              <i className="fa-solid fa-check" /> 20+ Módulos integrados
+            </div>
+            <div className="cip-pill">
+              <i className="fa-solid fa-check" /> Disponible 24/7
+            </div>
+          </div>
+
+          <div className="cip-hero-actions">
+            <a href="#contacto" className="cip-btn-primary">
+              <i className="fa-solid fa-rocket" />
+              Solicitar Demo
+            </a>
+            <a href="#modulos" className="cip-btn-ghost">
+              <i className="fa-solid fa-circle-play" />
+              Ver Módulos
             </a>
           </div>
-        </section>
+        </div>
 
-        <section id="modulos" className="border-t px-6 py-20" style={{ borderColor: "var(--border-soft)" }}>
-          <div className="mx-auto max-w-6xl">
-            <div className="mb-10 flex items-end justify-between gap-4">
-              <h2
-                className="text-2xl font-bold tracking-tight sm:text-3xl"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Todo el condominio, en un solo panel
-              </h2>
-              <p className="hidden text-sm sm:block" style={{ color: "var(--text-muted)" }}>
-                {MODULOS.filter((m) => m.estado === "disponible").length} de {MODULOS.length} módulos disponibles hoy
-              </p>
+        <div className="cip-hero-stats">
+          <div className="cip-hero-stat">
+            <div className="val">20+</div>
+            <div className="lbl">Módulos Integrados</div>
+          </div>
+          <div className="cip-hero-stat">
+            <div className="val">24/7</div>
+            <div className="lbl">Disponibilidad Cloud</div>
+          </div>
+          <div className="cip-hero-stat">
+            <div className="val">100%</div>
+            <div className="lbl">Ley N°21.442</div>
+          </div>
+        </div>
+
+        <div className="cip-hero-ley">
+          <i className="fa-solid fa-shield-halved" />
+          <div>
+            <div className="ley-title">Cumplimiento Ley N°21.442</div>
+            <div className="ley-sub">Nueva Ley de Copropiedad Inmobiliaria</div>
+          </div>
+        </div>
+      </section>
+
+      {/* STATS BAR */}
+      <div className="cip-stats-bar">
+        <div className="cip-stat-item">
+          <div className="num">150.000+</div>
+          <div className="desc">Condominios en Chile sin plataforma integrada</div>
+        </div>
+        <div className="cip-stat-item">
+          <div className="num">85%</div>
+          <div className="desc">Administradores aún usan planillas Excel</div>
+        </div>
+        <div className="cip-stat-item">
+          <div className="num">$2M</div>
+          <div className="desc">Pérdida anual promedio por errores manuales</div>
+        </div>
+        <div className="cip-stat-item">
+          <div className="num">2022</div>
+          <div className="desc">Año de entrada en vigor Ley N°21.442</div>
+        </div>
+      </div>
+
+      {/* MÓDULOS */}
+      <section className="cip-section" id="modulos">
+        <div className="cip-eyebrow">Arquitectura Funcional</div>
+        <h2 className="cip-section-title">20+ módulos completamente integrados</h2>
+        <p className="cip-section-sub">
+          Cada módulo comparte la misma base de datos — la información fluye automáticamente entre áreas
+          sin necesidad de doble digitación.
+        </p>
+
+        <div className="cip-modulos-grid">
+          {MODULOS.map(([icon, name, desc]) => (
+            <div className="cip-modulo-card cip-reveal" key={name}>
+              <div className="cip-modulo-icon">
+                <i className={`fa-solid ${icon}`} />
+              </div>
+              <div className="cip-modulo-name">{name}</div>
+              <div className="cip-modulo-desc">{desc}</div>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {MODULOS.map((modulo) => (
-                <div
-                  key={modulo.titulo}
-                  className="rounded-2xl border p-6"
-                  style={{
-                    borderColor: "var(--border-soft)",
-                    background: "linear-gradient(160deg, rgba(15,23,41,.6), rgba(11,18,32,.7))",
-                  }}
-                >
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <h3
-                      className="text-base font-semibold"
-                      style={{ fontFamily: "var(--font-display)" }}
-                    >
-                      {modulo.titulo}
-                    </h3>
-                    {modulo.estado === "disponible" ? (
-                      <span
-                        className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
-                        style={{ background: "rgba(52,211,153,.12)", color: "var(--green-ok)" }}
-                      >
-                        Disponible
-                      </span>
-                    ) : (
-                      <span
-                        className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
-                        style={{ background: "rgba(251,191,36,.12)", color: "var(--amber)" }}
-                      >
-                        Próximamente
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                    {modulo.detalle}
-                  </p>
-                </div>
+      {/* LEY 21.442 */}
+      <section className="cip-section cip-ley-section" id="ley">
+        <div className="cip-eyebrow">Cumplimiento Legal</div>
+        <h2 className="cip-section-title">Diseñado para la Ley N°21.442</h2>
+        <p className="cip-section-sub">
+          Nueva Ley de Copropiedad Inmobiliaria vigente en Chile desde 2022 — cumplimiento total desde el
+          primer día de uso.
+        </p>
+
+        <div className="cip-ley-grid">
+          {LEY_CARDS.map(([icon, title, desc]) => (
+            <div className="cip-ley-card cip-reveal" key={title}>
+              <div className="cip-ley-card-icon">
+                <i className={`fa-solid ${icon}`} />
+              </div>
+              <h3>{title}</h3>
+              <p>{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CÓMO FUNCIONA */}
+      <section className="cip-section">
+        <div className="cip-eyebrow">Flujo de Pago</div>
+        <h2 className="cip-section-title">Del cobro al ingreso en 5 pasos</h2>
+        <p className="cip-section-sub">
+          El residente paga, el sistema registra. Sin intervención manual, sin errores de traspaso.
+        </p>
+
+        <div className="cip-flow-steps">
+          {FLOW_STEPS.map(([title, desc], i) => (
+            <div className="cip-flow-step cip-reveal" key={title}>
+              <div className="cip-flow-num">{i + 1}</div>
+              <h4>{title}</h4>
+              <p>{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* TECNOLOGÍA */}
+      <section className="cip-section" id="tecnologia" style={{ background: "var(--panel)" }}>
+        <div className="cip-eyebrow">Stack Técnico</div>
+        <h2 className="cip-section-title">El top del mercado SaaS</h2>
+        <p className="cip-section-sub">
+          Arquitectura enterprise construida para escalar desde un condominio a miles simultáneamente.
+        </p>
+
+        <div className="cip-stack-grid">
+          {STACK_CARDS.map((card) => (
+            <div className={`cip-stack-card ${card.color} cip-reveal`} key={card.title}>
+              <div className={`cip-stack-icon ${card.color}`}>
+                <i className={`fa-solid ${card.icon}`} />
+              </div>
+              <h3>{card.title}</h3>
+              <p>{card.desc}</p>
+              <span className="cip-stack-tag">{card.tag}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* COMPARATIVA */}
+      <section className="cip-section" id="comparativa">
+        <div className="cip-eyebrow">¿Por qué elegirnos?</div>
+        <h2 className="cip-section-title">Lo que nos separa de la competencia</h2>
+        <p className="cip-section-sub">
+          No somos otra planilla Excel ni un software genérico. Somos el estándar que el mercado
+          necesitaba.
+        </p>
+
+        <div style={{ overflowX: "auto" }}>
+          <table className="cip-compare-table">
+            <thead>
+              <tr>
+                <th>Característica</th>
+                <th>Excel / Manual</th>
+                <th>Software Genérico</th>
+                <th className="highlight">Comunidad Inteligente PRO</th>
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARE_ROWS.map(([label, excel, generic]) => (
+                <tr key={label}>
+                  <td>{label}</td>
+                  <td>
+                    <span className={excel === "cross" ? "cip-cross" : "cip-partial"}>
+                      {excel === "cross" ? "✗" : "Parcial"}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={generic === "cross" ? "cip-cross" : "cip-partial"}>
+                      {generic === "cross" ? "✗" : "Parcial"}
+                    </span>
+                  </td>
+                  <td className="highlight">
+                    <span className="cip-check">✓</span>
+                  </td>
+                </tr>
               ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* CTA + EQUIPO */}
+      <section className="cip-section cip-cta-section" id="contacto">
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div className="cip-eyebrow" style={{ textAlign: "center" }}>
+            Contáctanos
+          </div>
+          <h2 className="cip-section-title" style={{ textAlign: "center" }}>
+            La administración de condominios
+            <br />
+            ya tiene un estándar más alto.
+          </h2>
+          <p className="cip-section-sub" style={{ margin: "0 auto 40px", textAlign: "center" }}>
+            Únete a la transformación digital de la copropiedad en Chile. Solicita una demo y descubre
+            cómo Comunidad Inteligente PRO puede transformar tu condominio.
+          </p>
+          <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap", marginBottom: 60 }}>
+            <a href="mailto:claudiocastro98@gmail.com" className="cip-btn-primary">
+              <i className="fa-solid fa-envelope" />
+              Solicitar Demo
+            </a>
+            <a href="https://wa.me/56962099949" className="cip-btn-ghost">
+              <i className="fa-brands fa-whatsapp" />
+              WhatsApp
+            </a>
+          </div>
+
+          <div className="cip-equipo-cards">
+            <div className="cip-equipo-card">
+              <div className="cip-equipo-avatar">CC</div>
+              <h3>Claudio Castro Avilés</h3>
+              <div className="cargo">Business Manager &amp; Co-Fundador</div>
+              <div className="contacto">
+                +56 9 6209 9949
+                <br />
+                claudiocastro98@gmail.com
+              </div>
+              <div className="provisorio">(correo provisorio)</div>
+            </div>
+            <div className="cip-equipo-card">
+              <div className="cip-equipo-avatar">CS</div>
+              <h3>Carlos Soto Llancafil</h3>
+              <div className="cargo">Business Manager &amp; Co-Fundador</div>
+              <div className="contacto">carlos.soto.llancafil@gmail.com</div>
+              <div className="provisorio">(correo provisorio)</div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <footer
-          className="border-t px-6 py-10 text-center text-sm"
-          style={{ borderColor: "var(--border-soft)", color: "var(--text-muted)" }}
-        >
-          © {new Date().getFullYear()} ControlCost — Riava
-        </footer>
-      </div>
+      {/* FOOTER */}
+      <footer className="cip-footer">
+        <div className="brand">
+          Comunidad Inteligente <em>PRO</em>
+        </div>
+        <div className="legal">© {new Date().getFullYear()} Comunidad Inteligente PRO — Todos los derechos reservados</div>
+        <div className="version">Versión Executive 2026</div>
+      </footer>
     </main>
   );
 }

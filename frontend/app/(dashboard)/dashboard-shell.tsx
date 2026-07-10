@@ -7,8 +7,8 @@ import { useAuthStore } from "@/store/auth";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Resumen" },
+  { href: "/dashboard/unidades", label: "Unidades" },
   { href: "/dashboard/residentes", label: "Residentes" },
-  { href: "/dashboard/gastos-comunes", label: "Gastos comunes" },
 ];
 
 async function fetchMe() {

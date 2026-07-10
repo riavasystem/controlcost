@@ -12,7 +12,7 @@ os.environ.setdefault("FRONTEND_URL", "http://localhost:3000")
 
 from app.core.config import settings  # noqa: E402
 from app.core.database import Base, get_db  # noqa: E402
-from app.core.security import hash_password  # noqa: E402
+from app.core.security import create_access_token, hash_password  # noqa: E402
 from app.main import app  # noqa: E402
 from app.models.condominio import Condominio  # noqa: E402
 from app.models.usuario import UserRole, Usuario  # noqa: E402
@@ -71,3 +71,9 @@ async def admin_user(db_session):
     db_session.add(usuario)
     await db_session.commit()
     return usuario
+
+
+@pytest_asyncio.fixture
+async def auth_headers(admin_user):
+    token = create_access_token(str(admin_user.id), {"rol": admin_user.rol.value})
+    return {"Authorization": f"Bearer {token}"}

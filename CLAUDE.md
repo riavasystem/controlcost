@@ -12,10 +12,11 @@ Fase actual: **Fase 1 (identidad y unidades)**, en curso. No avanzar a Fase 2 (f
 
 ## Estado: EN PRODUCCIÓN (desde 2026-07-10)
 
-- Frontend: **https://controlcost.riava.cl** (Vercel, deploy automático en cada push a `main` sobre `frontend/`).
+- Frontend: **https://controlcost.riava.cl** — landing pública en `/` (con metadata SEO real), panel en `/login` → `/dashboard`. Deploy automático en cada push a `main`.
 - Backend: **https://api.controlcost.riava.cl** (Hetzner, TLS con Let's Encrypt, deploy automático vía GitHub Actions en cada push a `main` sobre `backend/**`).
-- Verificado end-to-end en producción real: login → cookie httpOnly → `/api/auth/me` → dashboard, con datos viajando Vercel → Hetzner → Postgres `controlcost_prod`.
-- **Usuario admin de producción existente:** `admin@controlcost.cl` / `clave-segura-123` — es la misma credencial de prueba usada en local, creada solo para verificar el deploy. **Rotar esta clave (o borrar el usuario y crear uno real) antes de que cualquier condominio real use el sistema** — hoy cualquiera que lea este archivo puede entrar a producción con ella.
+- Verificado end-to-end en producción real: login → cookie httpOnly → CRUD de unidades y residentes → datos viajando Vercel → Hetzner → Postgres `controlcost_prod`.
+- **Usuario admin de producción:** `claudio.castro@riava.cl` — clave real, no compartida en este documento (rotada el 2026-07-10, ver `PROGRESS.md`). El script para rotar credenciales es `backend/scripts/rotate_admin.py <email_actual> <email_nuevo> <password_nueva>`.
+- Módulos con CRUD real funcionando: **Unidades**, **Residentes** (ligados a una unidad, con validación multi-tenant por `condominio_id`). El resto de módulos de v1 (gastos comunes, RRHH, multas, vehículos, visitas, encomiendas, comunicados) siguen sin construir — ver el orden de fases en la sección de blueprint más abajo antes de empezar el siguiente.
 
 ## Infraestructura real (ya provisionada, no hipotética)
 
@@ -64,10 +65,14 @@ Este proyecto vive en `~/Documents/Proyectos Claude/controlcost`, que está sinc
 **Ya se resolvió así, no repetir el diagnóstico:**
 - `backend/.venv` es un symlink a `~/.local-dev-cache/controlcost/backend-venv` (fuera de iCloud).
 - `frontend/node_modules` es un symlink a `~/.local-dev-cache/controlcost/frontend-node_modules` (fuera de iCloud).
+- **`frontend/.next`** (caché de Turbopack) es un symlink a `~/.local-dev-cache/controlcost/frontend-next-cache` (fuera de iCloud) — sin esto, `npm run dev` puede tardar **minutos por request** (`GET /login 200 in 3.5min`, `Finished writing to filesystem cache in 8.1min`). Si se borra `.next` alguna vez, recrear el symlink antes de correr `npm run dev` de nuevo, no dejar que Next lo regenere como carpeta real dentro de iCloud.
 - El propio `.git` del repo es un símlink-archivo (`gitdir: ...`) apuntando a `~/.local-dev-cache/controlcost/dotgit` (fuera de iCloud) — por eso `git push` empezó a funcionar recién después de mover esto.
 - La clave de deploy para GitHub Actions y el archivo con passwords generados (`hetzner-secrets.txt`) también viven en `~/.local-dev-cache/controlcost/`, no en el repo ni en iCloud.
+- **Cuidado con `.gitignore`:** un patrón con `/` al final (`.venv/`, `/.next/`) solo matchea directorios reales, **no** un symlink con ese nombre — por eso más de una vez un symlink se coló en `git add -A`. Todos los patrones de estas carpetas movidas deben ir **sin slash final** (`.venv`, `/.next`, `/node_modules` ya estaba bien).
 
-Si en el futuro `pip install`, `npm install`, `pytest` o `git` se cuelgan sin razón aparente en esta máquina, sospechar primero de iCloud antes de asumir un bug de código — verificar con `brctl status` si el proyecto sigue bajo una carpeta sincronizada.
+Si en el futuro `pip install`, `npm install`, `pytest`, `npm run dev` o `git` se cuelgan sin razón aparente en esta máquina, sospechar primero de iCloud antes de asumir un bug de código — verificar con `brctl status` si el proyecto sigue bajo una carpeta sincronizada, y revisar si alguna carpeta pesada nueva (caches, builds) quedó sin symlinkear afuera.
+
+**Segundo sospechoso, si iCloud ya no explica la lentitud:** memoria/swap agotados en la Mac. Un incidente real: con 8GB de RAM y ~58MB libres + 12.1GB/13.3GB de swap usado, `next dev` tardó 10+ minutos en arrancar sin ningún error — solo estaba siendo paginado constantemente por el sistema operativo. Diagnóstico rápido: `vm_stat | grep "Pages free"` y `sysctl vm.swapusage`. Si la RAM libre es de pocos MB y el swap está casi lleno, el problema es de recursos del sistema (probablemente otras apps pesadas abiertas: VMs, muchas pestañas de Chrome, varios VSCode), no del código — parar procesos de desarrollo propios que no se estén usando y, si no alcanza, pedir al usuario cerrar aplicaciones. En ese caso, es válido saltar la verificación en localhost y verificar directo contra producción (Vercel/Hetzner no comparten esa limitación de recursos).
 
 ## Bases de datos locales vs. de test (evita el error ya cometido una vez)
 

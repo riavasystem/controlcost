@@ -24,3 +24,99 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* =========================
+   LANDING — identidad visual heredada de UrbanCore v1
+   (mismos tokens que login.php / index.php de la v1, para
+   mantener continuidad de marca entre paneles)
+========================= */
+.landing-theme {
+  --bg-base: #060a14;
+  --bg-elevated: #0b1220;
+  --bg-panel: #0f1729;
+  --bg-panel-2: #111c33;
+  --border-soft: rgba(148, 178, 255, 0.1);
+  --border-strong: rgba(148, 178, 255, 0.22);
+
+  --blue-electric: #3b6cff;
+  --blue-electric-2: #5b8bff;
+  --cyan-tech: #22d3ee;
+  --cyan-tech-2: #67e8f9;
+
+  --green-ok: #34d399;
+  --amber: #fbbf24;
+  --red-alert: #f87171;
+
+  --text-primary: #eef2ff;
+  --text-secondary: #97a3c4;
+  --text-muted: #5d6889;
+
+  --glow-blue: 0 0 0 1px rgba(59, 108, 255, 0.25), 0 8px 30px rgba(59, 108, 255, 0.18);
+  --glow-cyan: 0 0 0 1px rgba(34, 211, 238, 0.25), 0 8px 30px rgba(34, 211, 238, 0.15);
+
+  background: var(--bg-base);
+  color: var(--text-primary);
+  position: relative;
+  isolation: isolate;
+}
+
+.landing-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(148, 178, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 178, 255, 0.05) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(circle at 50% 20%, rgba(0, 0, 0, 0.6), transparent 70%);
+  pointer-events: none;
+}
+
+.landing-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 14% 12%, rgba(59, 108, 255, 0.22), transparent 38%),
+    radial-gradient(circle at 88% 6%, rgba(34, 211, 238, 0.18), transparent 36%),
+    radial-gradient(circle at 50% 100%, rgba(59, 108, 255, 0.08), transparent 45%);
+  pointer-events: none;
+}
+
+.landing-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.45;
+  animation: landing-float 10s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-orb {
+    animation: none;
+  }
+}
+
+.landing-live-dot {
+  animation: landing-pulse 2s infinite;
+}
+
+@keyframes landing-float {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-18px) translateX(10px);
+  }
+}
+
+@keyframes landing-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(52, 211, 153, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+  }
+}

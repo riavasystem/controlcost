@@ -10,6 +10,13 @@ Stack: **FastAPI + SQLAlchemy 2.0 async + Alembic + JWT/bcrypt** (backend) — *
 
 Fase actual: **Fase 1 (identidad y unidades)**, en curso. No avanzar a Fase 2 (financiero/gastos comunes) sin que el usuario lo pida explícitamente — ver el orden de fases completo en el `CLAUDE.md` de UrbanCore v1.
 
+## Estado: EN PRODUCCIÓN (desde 2026-07-10)
+
+- Frontend: **https://controlcost.riava.cl** (Vercel, deploy automático en cada push a `main` sobre `frontend/`).
+- Backend: **https://api.controlcost.riava.cl** (Hetzner, TLS con Let's Encrypt, deploy automático vía GitHub Actions en cada push a `main` sobre `backend/**`).
+- Verificado end-to-end en producción real: login → cookie httpOnly → `/api/auth/me` → dashboard, con datos viajando Vercel → Hetzner → Postgres `controlcost_prod`.
+- **Usuario admin de producción existente:** `admin@controlcost.cl` / `clave-segura-123` — es la misma credencial de prueba usada en local, creada solo para verificar el deploy. **Rotar esta clave (o borrar el usuario y crear uno real) antes de que cualquier condominio real use el sistema** — hoy cualquiera que lea este archivo puede entrar a producción con ella.
+
 ## Infraestructura real (ya provisionada, no hipotética)
 
 | Recurso | Valor |
@@ -21,11 +28,12 @@ Fase actual: **Fase 1 (identidad y unidades)**, en curso. No avanzar a Fase 2 (f
 | Ruta de la app | `/opt/apps/controlcost/` con estructura `releases/<timestamp>/`, symlink `current -> releases/<x>`, `shared/{venv,uploads,logs,backups,run,.env}`, `scripts/` — mismo patrón que `clientefiel` |
 | Base de datos prod | Postgres ya corriendo en el servidor (single instance compartida). DB `controlcost_prod`, rol `controlcost_user`. Password real está en `shared/.env` en el servidor (no versionado) |
 | Puerto del API | `127.0.0.1:8001` (127.0.0.1:8000 ya lo usa `clientefiel-api`, 5001 lo usa `finops-api`) |
-| systemd | `controlcost-api.service` ya creado (`ExecStart=... uvicorn app.main:app --port 8001 --workers 2`, `User=controlcost`). Aún no arrancado — no hay ningún release en `current` todavía |
+| systemd | `controlcost-api.service` — `enabled` + `active (running)`, puerto 8001, 2 workers |
 | sudoers | `/etc/sudoers.d/deploy-controlcost`: `deploy` tiene NOPASSWD **solo** para `systemctl restart/status controlcost-api` — no se le dio sudo amplio |
-| Deploy key del repo (para el servidor) | Generada en el propio Hetzner: `/home/deploy/.ssh/controlcost_repo` + alias SSH `github-controlcost` en `/home/deploy/.ssh/config`. La clave pública ya se generó — **falta que un humano la agregue como Deploy Key (solo lectura) en GitHub → riavasystem/controlcost → Settings → Deploy keys** (ver "Pendientes manuales" abajo) |
-| Clave SSH del pipeline CI/CD (GitHub Actions → Hetzner) | Generada localmente en `~/.local-dev-cache/controlcost/deploy-key/controlcost_deploy` (fuera de iCloud). Su clave pública ya está instalada en `/home/deploy/.ssh/authorized_keys` del servidor. **Falta cargar la clave privada como secret `HETZNER_SSH_PRIVATE_KEY` en GitHub** (ver abajo) |
-| Frontend | Aún no desplegado a Vercel — pendiente que el usuario cree el proyecto en Vercel apuntando a este repo (carpeta `frontend/`) |
+| Deploy key del repo (para el servidor) | `/home/deploy/.ssh/controlcost_repo` + alias SSH `github-controlcost`. Ya agregada como Deploy Key de solo lectura en GitHub. Su host key (`github.com`) está en `/home/deploy/.ssh/known_hosts` — **esto costó el primer intento de deploy fallido** (ver "Incidentes ya resueltos" abajo) |
+| Clave SSH del pipeline CI/CD (GitHub Actions → Hetzner) | Generada localmente en `~/.local-dev-cache/controlcost/deploy-key/controlcost_deploy` (fuera de iCloud), instalada en `/home/deploy/.ssh/authorized_keys`. Ya cargada como secret `HETZNER_SSH_PRIVATE_KEY` en GitHub |
+| Frontend | **Desplegado en Vercel**, dominio `controlcost.riava.cl` (DNS en Cloudflare, proxy DNS-only) |
+| Dominio del backend | `api.controlcost.riava.cl` — registro `A` en Cloudflare (DNS-only) → `49.12.66.17`, nginx + certbot (Let's Encrypt, renueva automático, expira 2026-10-08) |
 | Redis | Ya corre en el servidor (`127.0.0.1:6379`), compartido; controlcost usa el índice de BD `1` (`redis://localhost:6379/1`) para no chocar con otros proyectos que usan el índice `0` |
 
 ### Por qué no Docker (decisión ya cerrada)
@@ -36,23 +44,18 @@ El usuario confirmó explícitamente **no usar Docker**, ni en local ni en Hetzn
 
 No se inventó: se copió exactamente la convención ya en uso por `clientefiel` en el mismo servidor (`releases/current/shared`, deploy vía símlink atómico, `shared/venv` persistente entre releases). Antes de crear nada se hizo reconocimiento SSH de `clientefiel` y `finopslatam` para no introducir un patrón distinto al del resto del servidor.
 
-## Pendientes manuales (requieren acción humana, no las puede hacer Claude sin acceso a las UIs)
+## Pendientes manuales
 
-1. **Agregar el Deploy Key de solo lectura a GitHub** para que Hetzner pueda clonar el repo:
-   - Ir a `github.com/riavasystem/controlcost` → Settings → Deploy keys → Add deploy key.
-   - Pegar el contenido de la clave pública generada en el servidor (se mostró en la sesión que hizo el provisioning; si se perdió, leerla con `ssh root@49.12.66.17 "cat /home/deploy/.ssh/controlcost_repo.pub"`).
-   - No marcar "Allow write access" — el deploy solo necesita clonar.
+Ninguno bloqueante — los 5 pendientes originales (deploy key, secrets de GitHub, proyecto Vercel, dominio+TLS, `FRONTEND_URL`) ya se resolvieron y el sistema está en producción (ver sección de arriba). Pendiente real que sigue abierto:
 
-2. **Cargar 3 secrets en GitHub** (repo → Settings → Secrets and variables → Actions):
-   - `HETZNER_HOST` = `49.12.66.17`
-   - `HETZNER_SSH_USER` = `deploy`
-   - `HETZNER_SSH_PRIVATE_KEY` = contenido completo de `~/.local-dev-cache/controlcost/deploy-key/controlcost_deploy` (la clave **privada**, no la `.pub`). Este archivo vive fuera de iCloud a propósito — nunca commitear esta clave al repo.
+- **Rotar la contraseña del admin de producción** (`admin@controlcost.cl`) antes de dar el sistema a un condominio real — hoy usa la misma clave de prueba que local.
 
-3. **Crear el proyecto en Vercel** apuntando a este repo, root directory `frontend/`, variable de entorno `API_URL` apuntando al backend real una vez tenga dominio (hoy el backend solo es accesible en `127.0.0.1:8001` dentro del servidor — falta nginx + dominio, ver siguiente punto).
+## Incidentes ya resueltos (para no volver a perder tiempo re-diagnosticando)
 
-4. **Definir el dominio del backend y configurar nginx + TLS.** Aún no se decidió el dominio público para la API (ej. `api.controlcost.cl` o similar). Sin esto, el backend no es alcanzable desde Vercel en producción — solo funciona en local por ahora. Una vez el usuario dé el dominio: crear `/etc/nginx/sites-available/<dominio>` (mismo patrón que `api.finopslatam.com`, proxy a `127.0.0.1:8001`), `certbot` para TLS, symlink a `sites-enabled`, `nginx -t && systemctl reload nginx`.
-
-5. **Actualizar `FRONTEND_URL` en `/opt/apps/controlcost/shared/.env`** (hoy tiene un placeholder `https://controlcost.vercel.app`) una vez exista la URL real de Vercel — de eso depende el CORS del backend.
+- **iCloud Drive colgando `pytest`/`npm`/`git`** — ver la sección dedicada más abajo. Se resolvió sacando `.venv`, `node_modules` y `.git` de la carpeta sincronizada.
+- **`git push`/`git add` colgándose o crasheando con `pack-objects died of signal 10`** — mismo origen (iCloud + `.git` dentro de la carpeta sincronizada), resuelto al mover `.git` fuera con el mecanismo `gitdir:`.
+- **Primer deploy a Hetzner falló con `Host key verification failed`** — el usuario `deploy` nunca se había conectado a `github.com` antes, así que no tenía su host key en `known_hosts` y la conexión no-interactiva de GitHub Actions no podía aceptarla. Se resolvió con `ssh-keyscan github.com >> /home/deploy/.ssh/known_hosts`. Si se agrega algún otro host remoto nuevo al pipeline de deploy en el futuro, hacer lo mismo primero.
+- **`AttributeError: module 'bcrypt' has no attribute '__about__'`** al crear usuarios con `create_admin.py` — warning cosmético de una incompatibilidad menor entre `passlib` y `bcrypt>=4.1`, no afecta el resultado (el hash se genera igual, el usuario se crea correctamente). Se puede silenciar en el futuro fijando `bcrypt<4.1` en `requirements.txt`, pero no es urgente.
 
 ## Nota importante sobre iCloud Drive (evita perder tiempo re-descubriendo esto)
 

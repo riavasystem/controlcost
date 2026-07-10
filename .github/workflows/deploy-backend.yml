@@ -24,7 +24,7 @@ jobs:
             APP_DIR=/opt/apps/controlcost
             RELEASE="$APP_DIR/releases/$(date +%Y%m%d_%H%M%S)"
 
-            git clone --depth 1 --branch main git@github.com:riavasystem/controlcost.git "$RELEASE"
+            git clone --depth 1 --branch main git@github-controlcost:riavasystem/controlcost.git "$RELEASE"
 
             ln -sfn "$APP_DIR/shared/.env" "$RELEASE/backend/.env"
 

@@ -18,7 +18,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Control Cost Pro — ERP SaaS para Condominios en Chile",
   description:
-    "ERP SaaS para la administración inteligente de condominios y edificios en Chile. Cumplimiento Ley N°21.442, 20+ módulos integrados, disponible 24/7.",
+    "ERP SaaS para la administración inteligente de condominios y edificios en Chile. Cumplimiento Ley N°21.442, 17 módulos integrados, disponible 24/7.",
   openGraph: {
     title: "Control Cost Pro — ERP SaaS para Condominios en Chile",
     description:
@@ -32,8 +32,6 @@ const MODULOS: Array<[string, string, string]> = [
   ["fa-building", "Gastos Comunes", "Cobro por m² configurable con extraordinarios."],
   ["fa-money-bill-wave", "Registro de Pagos", "Canal de pago con reversión inteligente."],
   ["fa-coins", "Finanzas", "Ingresos y egresos con trazabilidad completa."],
-  ["fa-file-invoice-dollar", "Contabilidad", "Balance, IVA y fondo de reserva automático."],
-  ["fa-user-tie", "RR.HH.", "Personal, contratos y libro de remuneraciones PDF."],
   ["fa-gavel", "Multas", "Infracciones con ingreso automático al registrar."],
   ["fa-bullhorn", "Comunicados", "Avisos con prioridad: normal, importante, urgente."],
   ["fa-clock", "Control Visitas", "Registro entrada/salida con alerta de +8 horas."],
@@ -44,7 +42,6 @@ const MODULOS: Array<[string, string, string]> = [
   ["fa-scale-balanced", "Ley 21.442", "Cumplimiento normativo completo."],
   ["fa-credit-card", "Pagos Online", "Webpay integrado para residentes."],
   ["fa-mobile-alt", "App Móvil", "Portal del residente desde su celular."],
-  ["fa-robot", "Asistente IA", "Consultas conversacionales sobre el estado."],
   ["fa-clipboard-list", "Reportes", "Informes para juntas de copropietarios."],
   ["fa-layer-group", "Multi-Condominio", "Una cuenta, múltiples comunidades."],
 ];
@@ -221,7 +218,7 @@ export default function LandingPage() {
               <i className="fa-solid fa-check" /> Laravel 11 + SQL Server
             </div>
             <div className="cip-pill">
-              <i className="fa-solid fa-check" /> 20+ Módulos integrados
+              <i className="fa-solid fa-check" /> 17 Módulos integrados
             </div>
             <div className="cip-pill">
               <i className="fa-solid fa-check" /> Disponible 24/7
@@ -242,7 +239,7 @@ export default function LandingPage() {
 
         <div className="cip-hero-stats">
           <div className="cip-hero-stat">
-            <div className="val">20+</div>
+            <div className="val">17</div>
             <div className="lbl">Módulos Integrados</div>
           </div>
           <div className="cip-hero-stat">
@@ -287,7 +284,7 @@ export default function LandingPage() {
       {/* MÓDULOS */}
       <section className="cip-section" id="modulos">
         <div className="cip-eyebrow">Arquitectura Funcional</div>
-        <h2 className="cip-section-title">20+ módulos completamente integrados</h2>
+        <h2 className="cip-section-title">17 módulos completamente integrados</h2>
         <p className="cip-section-sub">
           Cada módulo comparte la misma base de datos — la información fluye automáticamente entre áreas
           sin necesidad de doble digitación.

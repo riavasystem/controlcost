@@ -1,0 +1,47 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-backend.yml"
+
+jobs:
+  deploy:
+    name: Deploy a Hetzner VPS (/opt/apps/controlcost)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_SSH_USER }}
+          key: ${{ secrets.HETZNER_SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            APP_DIR=/opt/apps/controlcost
+            RELEASE="$APP_DIR/releases/$(date +%Y%m%d_%H%M%S)"
+
+            git clone --depth 1 --branch main git@github.com:riavasystem/controlcost.git "$RELEASE"
+
+            ln -sfn "$APP_DIR/shared/.env" "$RELEASE/backend/.env"
+
+            source "$APP_DIR/shared/venv/bin/activate"
+            pip install -q -r "$RELEASE/backend/requirements.txt"
+
+            cd "$RELEASE/backend"
+            alembic upgrade head
+
+            ln -sfn "$RELEASE" "$APP_DIR/current"
+
+            sudo systemctl restart controlcost-api
+
+            sleep 3
+            curl -sf http://127.0.0.1:8001/health || exit 1
+
+            # Conserva solo las últimas 5 releases
+            cd "$APP_DIR/releases" && ls -1t | tail -n +6 | xargs -r rm -rf
+
+            echo "Deploy exitoso: $RELEASE"

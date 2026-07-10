@@ -198,11 +198,6 @@ export default function LandingPage() {
         <div className="cip-hero-orb" />
 
         <div className="cip-hero-content">
-          <div className="cip-hero-badge">
-            <i className="fa-solid fa-star" />
-            Versión Executive 2026
-          </div>
-
           <h1>
             Control Cost
             <br />
@@ -238,21 +233,6 @@ export default function LandingPage() {
               <i className="fa-solid fa-circle-play" />
               Ver Módulos
             </a>
-          </div>
-        </div>
-
-        <div className="cip-hero-stats">
-          <div className="cip-hero-stat">
-            <div className="val">17</div>
-            <div className="lbl">Módulos Integrados</div>
-          </div>
-          <div className="cip-hero-stat">
-            <div className="val">24/7</div>
-            <div className="lbl">Disponibilidad Cloud</div>
-          </div>
-          <div className="cip-hero-stat">
-            <div className="val">100%</div>
-            <div className="lbl">Ley N°21.442</div>
           </div>
         </div>
 

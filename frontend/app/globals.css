@@ -187,21 +187,6 @@ body {
   z-index: 3;
   max-width: 640px;
 }
-.cip-hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(0, 212, 255, 0.1);
-  border: 1px solid rgba(0, 212, 255, 0.3);
-  padding: 7px 16px;
-  border-radius: 20px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--cyan);
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  margin-bottom: 28px;
-}
 .cip-hero h1 {
   font-family: var(--font-display);
   font-size: clamp(38px, 6vw, 68px);
@@ -281,39 +266,6 @@ body {
 .cip-btn-ghost:hover {
   background: rgba(0, 212, 255, 0.08);
   border-color: var(--cyan);
-}
-.cip-hero-stats {
-  position: absolute;
-  right: 5%;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  z-index: 3;
-}
-.cip-hero-stat {
-  background: rgba(13, 30, 53, 0.88);
-  border: 1px solid rgba(0, 212, 255, 0.2);
-  padding: 18px 22px;
-  border-radius: var(--r);
-  backdrop-filter: blur(10px);
-  min-width: 185px;
-  transition: transform 0.2s;
-}
-.cip-hero-stat:hover {
-  transform: translateX(-4px);
-}
-.cip-hero-stat .val {
-  font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--cyan);
-  margin-bottom: 4px;
-}
-.cip-hero-stat .lbl {
-  font-size: 12px;
-  color: var(--gray);
 }
 .cip-hero-ley {
   position: absolute;
@@ -813,7 +765,6 @@ body {
 
 /* RESPONSIVE */
 @media (max-width: 900px) {
-  .cip-hero-stats,
   .cip-hero-ley {
     display: none;
   }

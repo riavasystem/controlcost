@@ -129,6 +129,72 @@ body {
   color: #040c1a !important;
 }
 
+/* MOBILE NAV (hamburger) */
+.cip-nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.cip-nav-toggle span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--cyan);
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.cip-nav-toggle[aria-expanded="true"] span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.cip-nav-toggle[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+}
+.cip-nav-toggle[aria-expanded="true"] span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+.cip-mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(4, 12, 26, 0.97);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.12);
+  padding: 8px 5% 20px;
+}
+.cip-mobile-menu ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cip-mobile-menu a {
+  display: block;
+  padding: 14px 4px;
+  color: var(--gray);
+  font-size: 15.5px;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.cip-mobile-menu a:hover {
+  color: var(--cyan);
+}
+.cip-mobile-menu .cip-nav-cta {
+  display: inline-block;
+  margin-top: 12px;
+  border-bottom: none;
+  text-align: center;
+}
+
 /* HERO */
 .cip-hero {
   min-height: 100vh;
@@ -770,11 +836,21 @@ body {
   }
   .cip-hero {
     padding: 100px 5% 60px;
+    min-height: 100svh;
   }
   .cip-nav-links {
     display: none;
   }
+  .cip-nav-toggle {
+    display: flex;
+  }
   .cip-flow-steps::after {
+    display: none;
+  }
+}
+
+@media (min-width: 901px) {
+  .cip-mobile-menu {
     display: none;
   }
 }
@@ -785,5 +861,9 @@ body {
   }
   .cip-hero h1 {
     font-size: 34px;
+  }
+  .cip-hero-video {
+    height: 100%;
+    object-position: center;
   }
 }

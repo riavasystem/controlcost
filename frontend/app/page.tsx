@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Space_Grotesk, Inter } from "next/font/google";
 import { ScrollReveal } from "./scroll-reveal";
+import { MobileNav } from "./mobile-nav";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
@@ -186,6 +187,7 @@ export default function LandingPage() {
             </a>
           </li>
         </ul>
+        <MobileNav />
       </nav>
 
       {/* HERO */}

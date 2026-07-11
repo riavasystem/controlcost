@@ -237,14 +237,6 @@ export default function LandingPage() {
             </a>
           </div>
         </div>
-
-        <div className="cip-hero-ley">
-          <i className="fa-solid fa-shield-halved" />
-          <div>
-            <div className="ley-title">Cumplimiento Ley N°21.442</div>
-            <div className="ley-sub">Nueva Ley de Copropiedad Inmobiliaria</div>
-          </div>
-        </div>
       </section>
 
       {/* STATS BAR */}

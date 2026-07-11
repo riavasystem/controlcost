@@ -193,7 +193,7 @@ export default function LandingPage() {
       {/* HERO */}
       <section className="cip-hero">
         <video className="cip-hero-video" autoPlay muted loop playsInline preload="auto">
-          <source src="/videos/hero.mp4" type="video/mp4" />
+          <source src="/videos/hero2.mp4" type="video/mp4" />
         </video>
         <div className="cip-hero-overlay" />
         <div className="cip-hero-grid" />

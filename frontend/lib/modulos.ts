@@ -42,7 +42,7 @@ export const MODULOS: Modulo[] = [
     icon: "fa-building",
     name: "Gastos Comunes",
     description: "Cobro por m² configurable con extraordinarios.",
-    status: "proximamente",
+    status: "activo",
   },
   {
     slug: "pagos",

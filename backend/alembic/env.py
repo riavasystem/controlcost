@@ -7,7 +7,14 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.core.config import settings
 from app.core.database import Base
-from app.models import Condominio, Residente, Unidad, Usuario  # noqa: F401  (registra los modelos en Base.metadata)
+from app.models import (  # noqa: F401  (registra los modelos en Base.metadata)
+    CargoUnidad,
+    Condominio,
+    PeriodoGastoComun,
+    Residente,
+    Unidad,
+    Usuario,
+)
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url.replace("postgresql://", "postgresql+asyncpg://"))

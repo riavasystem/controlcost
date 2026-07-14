@@ -2,5 +2,14 @@ from app.models.condominio import Condominio
 from app.models.usuario import Usuario, UserRole
 from app.models.unidad import Unidad
 from app.models.residente import Residente
+from app.models.gasto_comun import CargoUnidad, PeriodoGastoComun
 
-__all__ = ["Condominio", "Usuario", "UserRole", "Unidad", "Residente"]
+__all__ = [
+    "Condominio",
+    "Usuario",
+    "UserRole",
+    "Unidad",
+    "Residente",
+    "PeriodoGastoComun",
+    "CargoUnidad",
+]

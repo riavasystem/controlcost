@@ -1,12 +1,36 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/auth";
 import { MODULOS } from "@/lib/modulos";
+import type { PeriodoGastoComun, Residente, Unidad } from "@/lib/types";
+
+async function fetchJson<T>(url: string): Promise<T> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`No se pudo cargar ${url}`);
+  return response.json();
+}
+
+function formatMonto(valor: string) {
+  return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(Number(valor));
+}
 
 export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const activos = MODULOS.filter((m) => m.status === "activo").length;
   const total = MODULOS.length;
+
+  const { data: unidades } = useQuery({ queryKey: ["unidades"], queryFn: () => fetchJson<Unidad[]>("/api/unidades") });
+  const { data: residentes } = useQuery({
+    queryKey: ["residentes"],
+    queryFn: () => fetchJson<Residente[]>("/api/residentes"),
+  });
+  const { data: periodos } = useQuery({
+    queryKey: ["gastos-comunes"],
+    queryFn: () => fetchJson<PeriodoGastoComun[]>("/api/gastos-comunes"),
+  });
+
+  const periodoActual = periodos?.[0];
 
   return (
     <div>
@@ -16,7 +40,7 @@ export default function DashboardPage() {
         (identidad y unidades) en construcción.
       </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <p className="text-sm text-slate-500">Módulos activos</p>
           <p className="mt-2 text-2xl font-semibold text-slate-900">
@@ -25,11 +49,23 @@ export default function DashboardPage() {
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <p className="text-sm text-slate-500">Unidades</p>
-          <p className="mt-2 text-2xl font-semibold text-slate-900">—</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-900">{unidades?.length ?? "—"}</p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <p className="text-sm text-slate-500">Residentes</p>
-          <p className="mt-2 text-2xl font-semibold text-slate-900">—</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-900">{residentes?.length ?? "—"}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+          <p className="text-sm text-slate-500">Recaudado último período</p>
+          <p className="mt-2 text-2xl font-semibold text-emerald-700">
+            {periodoActual ? formatMonto(periodoActual.total_recaudado) : "—"}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+          <p className="text-sm text-slate-500">Pendiente último período</p>
+          <p className="mt-2 text-2xl font-semibold text-amber-700">
+            {periodoActual ? formatMonto(periodoActual.total_pendiente) : "—"}
+          </p>
         </div>
       </div>
 

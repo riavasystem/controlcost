@@ -3,6 +3,7 @@ from app.models.usuario import Usuario, UserRole
 from app.models.unidad import Unidad
 from app.models.residente import Residente
 from app.models.gasto_comun import CargoUnidad, PeriodoGastoComun
+from app.models.pago import MetodoPago, Pago
 
 __all__ = [
     "Condominio",
@@ -12,4 +13,6 @@ __all__ = [
     "Residente",
     "PeriodoGastoComun",
     "CargoUnidad",
+    "Pago",
+    "MetodoPago",
 ]

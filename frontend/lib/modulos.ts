@@ -50,7 +50,7 @@ export const MODULOS: Modulo[] = [
     icon: "fa-money-bill-wave",
     name: "Registro de Pagos",
     description: "Canal de pago con reversión inteligente.",
-    status: "proximamente",
+    status: "activo",
   },
   {
     slug: "finanzas",

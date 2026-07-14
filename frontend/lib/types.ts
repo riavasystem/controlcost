@@ -74,3 +74,21 @@ export type Pago = {
   fecha_pago: string;
   reversado: boolean;
 };
+
+export type TipoMovimiento = "ingreso" | "egreso";
+
+export type MovimientoFinanciero = {
+  id: string;
+  tipo: TipoMovimiento;
+  categoria: string;
+  monto: string;
+  descripcion: string | null;
+  fecha: string;
+};
+
+export type ResumenFinanciero = {
+  total_recaudado_gastos_comunes: string;
+  total_ingresos_manuales: string;
+  total_egresos: string;
+  balance: string;
+};

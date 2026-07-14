@@ -58,7 +58,7 @@ export const MODULOS: Modulo[] = [
     icon: "fa-coins",
     name: "Finanzas",
     description: "Ingresos y egresos con trazabilidad completa.",
-    status: "proximamente",
+    status: "activo",
   },
   {
     slug: "multas",

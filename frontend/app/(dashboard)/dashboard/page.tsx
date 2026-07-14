@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/auth";
 import { MODULOS } from "@/lib/modulos";
-import type { PeriodoGastoComun, Residente, Unidad } from "@/lib/types";
+import type { PeriodoGastoComun, Residente, ResumenFinanciero, Unidad } from "@/lib/types";
 
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url);
@@ -29,6 +29,10 @@ export default function DashboardPage() {
     queryKey: ["gastos-comunes"],
     queryFn: () => fetchJson<PeriodoGastoComun[]>("/api/gastos-comunes"),
   });
+  const { data: resumenFinanciero } = useQuery({
+    queryKey: ["finanzas", "resumen"],
+    queryFn: () => fetchJson<ResumenFinanciero>("/api/finanzas/resumen"),
+  });
 
   const periodoActual = periodos?.[0];
 
@@ -40,7 +44,7 @@ export default function DashboardPage() {
         (identidad y unidades) en construcción.
       </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <p className="text-sm text-slate-500">Módulos activos</p>
           <p className="mt-2 text-2xl font-semibold text-slate-900">
@@ -65,6 +69,12 @@ export default function DashboardPage() {
           <p className="text-sm text-slate-500">Pendiente último período</p>
           <p className="mt-2 text-2xl font-semibold text-amber-700">
             {periodoActual ? formatMonto(periodoActual.total_pendiente) : "—"}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+          <p className="text-sm text-slate-500">Balance financiero</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-900">
+            {resumenFinanciero ? formatMonto(resumenFinanciero.balance) : "—"}
           </p>
         </div>
       </div>

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, finanzas, gastos_comunes, pagos, residentes, unidades
+from app.api import auth, finanzas, gastos_comunes, multas, pagos, residentes, unidades
 from app.core.config import settings
 
 app = FastAPI(
@@ -25,6 +25,7 @@ app.include_router(residentes.router, prefix="/api/v1")
 app.include_router(gastos_comunes.router, prefix="/api/v1")
 app.include_router(pagos.router, prefix="/api/v1")
 app.include_router(finanzas.router, prefix="/api/v1")
+app.include_router(multas.router, prefix="/api/v1")
 
 
 @app.get("/health")

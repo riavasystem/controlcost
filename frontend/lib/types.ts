@@ -92,3 +92,14 @@ export type ResumenFinanciero = {
   total_egresos: string;
   balance: string;
 };
+
+export type Multa = {
+  id: string;
+  unidad_id: string;
+  unidad_numero: string;
+  unidad_torre: string | null;
+  motivo: string;
+  monto: string;
+  fecha: string;
+  pagada: boolean;
+};

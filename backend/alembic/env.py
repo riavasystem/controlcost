@@ -11,6 +11,7 @@ from app.models import (  # noqa: F401  (registra los modelos en Base.metadata)
     CargoUnidad,
     Condominio,
     MovimientoFinanciero,
+    Multa,
     Pago,
     PeriodoGastoComun,
     Residente,

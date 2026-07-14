@@ -5,6 +5,7 @@ from app.models.residente import Residente
 from app.models.gasto_comun import CargoUnidad, PeriodoGastoComun
 from app.models.pago import MetodoPago, Pago
 from app.models.finanza import MovimientoFinanciero, TipoMovimiento
+from app.models.multa import Multa
 
 __all__ = [
     "Condominio",
@@ -18,4 +19,5 @@ __all__ = [
     "MetodoPago",
     "MovimientoFinanciero",
     "TipoMovimiento",
+    "Multa",
 ]

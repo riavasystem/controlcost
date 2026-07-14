@@ -66,7 +66,7 @@ export const MODULOS: Modulo[] = [
     icon: "fa-gavel",
     name: "Multas",
     description: "Infracciones con ingreso automático al registrar.",
-    status: "proximamente",
+    status: "activo",
   },
   {
     slug: "comunicados",

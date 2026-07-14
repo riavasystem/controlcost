@@ -103,3 +103,14 @@ export type Multa = {
   fecha: string;
   pagada: boolean;
 };
+
+export type PrioridadComunicado = "normal" | "importante" | "urgente";
+
+export type Comunicado = {
+  id: string;
+  titulo: string;
+  contenido: string;
+  prioridad: PrioridadComunicado;
+  autor_nombre: string;
+  created_at: string;
+};

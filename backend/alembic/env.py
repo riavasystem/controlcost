@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.core.database import Base
 from app.models import (  # noqa: F401  (registra los modelos en Base.metadata)
     CargoUnidad,
+    Comunicado,
     Condominio,
     MovimientoFinanciero,
     Multa,

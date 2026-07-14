@@ -74,7 +74,7 @@ export const MODULOS: Modulo[] = [
     icon: "fa-bullhorn",
     name: "Comunicados",
     description: "Avisos con prioridad: normal, importante, urgente.",
-    status: "proximamente",
+    status: "activo",
   },
   {
     slug: "visitas",

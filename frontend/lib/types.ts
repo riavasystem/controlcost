@@ -126,3 +126,14 @@ export type Visita = {
   hora_salida: string | null;
   alerta: boolean;
 };
+
+export type Vehiculo = {
+  id: string;
+  unidad_id: string;
+  unidad_numero: string;
+  unidad_torre: string | null;
+  patente: string;
+  marca: string | null;
+  modelo: string | null;
+  color: string | null;
+};

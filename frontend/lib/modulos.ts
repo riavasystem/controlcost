@@ -90,7 +90,7 @@ export const MODULOS: Modulo[] = [
     icon: "fa-car-side",
     name: "Vehículos",
     description: "Padrón maestro vinculado a cada unidad.",
-    status: "proximamente",
+    status: "activo",
   },
   {
     slug: "encomiendas",

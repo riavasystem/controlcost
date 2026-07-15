@@ -8,6 +8,7 @@ from app.models.finanza import MovimientoFinanciero, TipoMovimiento
 from app.models.multa import Multa
 from app.models.comunicado import Comunicado, PrioridadComunicado
 from app.models.visita import Visita
+from app.models.vehiculo import Vehiculo
 
 __all__ = [
     "Condominio",
@@ -25,4 +26,5 @@ __all__ = [
     "Comunicado",
     "PrioridadComunicado",
     "Visita",
+    "Vehiculo",
 ]

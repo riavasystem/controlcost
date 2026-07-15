@@ -35,7 +35,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <main className="relative flex min-h-screen items-center justify-center bg-slate-50 px-4 text-slate-900 scheme-light">
       <Link
         href="/"
         className="absolute left-4 top-4 text-lg font-semibold text-slate-900 sm:left-6 sm:top-6"

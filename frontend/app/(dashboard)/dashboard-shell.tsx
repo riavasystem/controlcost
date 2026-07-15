@@ -38,7 +38,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50 text-slate-900 scheme-light">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
       <aside className="flex w-64 flex-col border-r border-slate-200 bg-white px-4 py-6">
         <p className="mb-6 px-2 text-lg font-semibold text-slate-900">ControlCost</p>

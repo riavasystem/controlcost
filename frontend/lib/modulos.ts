@@ -98,7 +98,7 @@ export const MODULOS: Modulo[] = [
     icon: "fa-box-open",
     name: "Encomiendas",
     description: "Ciclo llegada → notificación → retiro.",
-    status: "proximamente",
+    status: "activo",
   },
   {
     slug: "guardias",

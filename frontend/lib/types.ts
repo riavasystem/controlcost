@@ -137,3 +137,17 @@ export type Vehiculo = {
   modelo: string | null;
   color: string | null;
 };
+
+export type EstadoEncomienda = "pendiente" | "retirado";
+
+export type Encomienda = {
+  id: string;
+  unidad_id: string;
+  unidad_numero: string;
+  unidad_torre: string | null;
+  descripcion: string;
+  estado: EstadoEncomienda;
+  fecha_llegada: string;
+  fecha_retiro: string | null;
+  retirado_por: string | null;
+};

@@ -9,6 +9,7 @@ from app.models.multa import Multa
 from app.models.comunicado import Comunicado, PrioridadComunicado
 from app.models.visita import Visita
 from app.models.vehiculo import Vehiculo
+from app.models.encomienda import Encomienda, EstadoEncomienda
 
 __all__ = [
     "Condominio",
@@ -27,4 +28,6 @@ __all__ = [
     "PrioridadComunicado",
     "Visita",
     "Vehiculo",
+    "Encomienda",
+    "EstadoEncomienda",
 ]

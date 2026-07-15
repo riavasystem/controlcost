@@ -148,12 +148,4 @@ export const MODULOS: Modulo[] = [
     description: "Informes para juntas de copropietarios.",
     status: "activo",
   },
-  {
-    slug: "multi-condominio",
-    href: "/dashboard/multi-condominio",
-    icon: "fa-layer-group",
-    name: "Multi-Condominio",
-    description: "Una cuenta, múltiples comunidades.",
-    status: "proximamente",
-  },
 ];

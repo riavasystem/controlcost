@@ -1,5 +1,37 @@
 # PROGRESS.md — Bitácora de sesiones (ControlCost)
 
+## Sesión 2026-07-14/15 — 12 módulos nuevos con backend real (Fase 2 y más allá)
+
+El usuario pidió reflejar los 17 módulos de la landing en el menú del dashboard (primero solo navegación + Resumen con estado activo/próximamente), y luego pidió construir la funcionalidad real de todos los que decían "Próximamente", uno por uno, en orden lógico, dejando el deploy para el final ("completa todos los módulos de manera local y cuando ya estén completos los desplegamos todos juntos"). Esto significó avanzar explícitamente a Fase 2 (financiero) y más allá, algo que el usuario autorizó de forma explícita como pedía el `CLAUDE.md`.
+
+**Módulos construidos (backend con tests + migración Alembic + frontend con Route Handlers), en este orden:**
+1. **Gastos Comunes** — períodos con tarifa $/m² + extraordinario, genera automáticamente un cargo por unidad.
+2. **Registro de Pagos** — pagos por cargo con reversión inteligente (revertir libera el cargo y permite volver a pagarlo).
+3. **Finanzas** — movimientos manuales de ingreso/egreso, balance combinado con lo recaudado en Pagos.
+4. **Multas** — al registrar una multa se crea automáticamente un ingreso en Finanzas (categoría "Multas"); eliminar la multa elimina también ese ingreso.
+5. **Comunicados** — avisos con prioridad normal/importante/urgente, lectura abierta a todos los roles.
+6. **Control Visitas** — entrada/salida por unidad, con alerta automática si pasan +8 horas sin registrar salida.
+7. **Vehículos** — padrón maestro (patente única por condominio) vinculado a una unidad.
+8. **Encomiendas** — ciclo llegada → notificación → retiro, con quién retira y cuándo.
+9. **Guardias** — turnos semanales recurrentes (día + hora inicio/fin) del personal de seguridad.
+10. **Proveedores** — directorio simple de servicios externos.
+11. **Ley 21.442** — no es una entidad nueva: dashboard de cumplimiento que agrega datos reales de los módulos anteriores (recaudación, padrón, rendición, bitácora de accesos) mapeados a los artículos relevantes de la ley.
+12. **Reportes** — dos informes CSV descargables reales (detalle de cargos por período de gasto común, y rendición financiera completa), vía `StreamingResponse` en FastAPI.
+
+**Dejados fuera, con decisión explícita del usuario:**
+- **Pagos Online** (Webpay/Transbank) y **App Móvil** (portal del residente): quedan en "Próximamente". Requieren decisiones que no correspondía tomar solo — Pagos Online necesita credenciales reales de Transbank (no fabricar una integración falsa que aparente cobrar), y App Móvil requiere definir qué puede ver/hacer el rol `RESIDENTE` (hoy sin ningún acceso al panel).
+- **Multi-Condominio**: **eliminado del sistema** (ya no aparece en el menú ni en el Resumen). Requiere un cambio de arquitectura real (relación usuario–condominio de 1 a muchos, selector de condominio activo, tocar todos los endpoints que hoy asumen un solo `condominio_id`) — se decidió que amerita su propia fase planificada aparte, no forzarlo junto al resto.
+
+**Estado del deploy al cerrar esta sesión — pendiente, con un problema sin resolver:**
+- El primer commit de esta tanda (Gastos Comunes) sí se desplegó automáticamente y se verificó en producción (`/health` 200, `/api/v1/gastos-comunes` 403 sin token).
+- A partir del segundo commit (Registro de Pagos), **el deploy automático de Vercel dejó de dispararse** — el usuario reportó "no corrió el deploy en Vercel". Se investigó: el commit sí llegó a GitHub (`git ls-remote` confirma `HEAD` correcto), pero el proyecto `clientes-riava/controlcost-29ca` no generó ningún deployment nuevo. Dos intentos de deploy manual (`vercel deploy --prod --yes`) quedaron atascados en estado `UNKNOWN`/"Building…" indefinidamente (uno de ellos se dejó correr ~30 min sin avanzar, se canceló con `vercel rm`). No hay incidente reportado en vercel-status.com. **Causa raíz aún sin identificar** — pendiente revisar directamente el dashboard de Vercel (pestaña Deployments → logs del build atascado) para ver el error real, algo que no es visible desde la CLI.
+- El backend en Hetzner solo tiene aplicada la migración de Gastos Comunes; las 10 migraciones siguientes (Pagos, Finanzas, Multas, Comunicados, Visitas, Vehículos, Encomiendas, Guardias, Proveedores — Ley21442 y Reportes no agregan tablas nuevas) **existen solo localmente**, no se han hecho push ni deploy.
+- Todo el trabajo de esta sesión quedó commiteado en `main` localmente (11 commits, uno por módulo + el de eliminar Multi-Condominio), pero **sin push**, a la espera de resolver el problema de Vercel antes de desplegar todo junto.
+
+**Próximo paso (siguiente sesión):** 1) diagnosticar por qué Vercel dejó de auto-desplegar y por qué los deploys manuales quedan en `UNKNOWN` (revisar dashboard directamente); 2) una vez resuelto, `git push` de todo lo acumulado y verificar cada endpoint nuevo contra `https://api.controlcost.riava.cl` (la migración de cada módulo corre automáticamente en el push); 3) decidir con el usuario cuándo retomar Pagos Online, App Móvil y (como fase aparte) Multi-Condominio.
+
+---
+
 ## Sesión 2026-07-10 (parte 3) — Primer módulo real + landing pública
 
 Continuación de las partes 1 y 2 del mismo día (auditoría/blueprint, luego puesta en producción). El usuario pidió rotar la credencial de prueba y avanzar con las páginas reales (landing + módulos), decidiendo hacerlo módulo por módulo empezando por residentes/unidades, y sí construir una landing de marketing en `/`.

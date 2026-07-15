@@ -17,6 +17,7 @@ from app.models import (  # noqa: F401  (registra los modelos en Base.metadata)
     Pago,
     PeriodoGastoComun,
     Residente,
+    TurnoGuardia,
     Unidad,
     Usuario,
     Vehiculo,

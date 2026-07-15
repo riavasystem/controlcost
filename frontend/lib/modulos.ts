@@ -106,7 +106,7 @@ export const MODULOS: Modulo[] = [
     icon: "fa-shield-halved",
     name: "Guardias",
     description: "Turnos y horarios del personal de seguridad.",
-    status: "proximamente",
+    status: "activo",
   },
   {
     slug: "proveedores",

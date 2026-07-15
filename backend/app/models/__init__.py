@@ -10,6 +10,7 @@ from app.models.comunicado import Comunicado, PrioridadComunicado
 from app.models.visita import Visita
 from app.models.vehiculo import Vehiculo
 from app.models.encomienda import Encomienda, EstadoEncomienda
+from app.models.guardia import DiaSemana, TurnoGuardia
 
 __all__ = [
     "Condominio",
@@ -30,4 +31,6 @@ __all__ = [
     "Vehiculo",
     "Encomienda",
     "EstadoEncomienda",
+    "TurnoGuardia",
+    "DiaSemana",
 ]

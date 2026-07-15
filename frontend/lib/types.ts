@@ -151,3 +151,21 @@ export type Encomienda = {
   fecha_retiro: string | null;
   retirado_por: string | null;
 };
+
+export type DiaSemana =
+  | "lunes"
+  | "martes"
+  | "miercoles"
+  | "jueves"
+  | "viernes"
+  | "sabado"
+  | "domingo";
+
+export type TurnoGuardia = {
+  id: string;
+  nombre_guardia: string;
+  telefono: string | null;
+  dia_semana: DiaSemana;
+  hora_inicio: string;
+  hora_fin: string;
+};

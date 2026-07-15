@@ -12,6 +12,7 @@ from app.api import (
     multas,
     pagos,
     proveedores,
+    reportes,
     residentes,
     unidades,
     vehiculos,
@@ -48,6 +49,7 @@ app.include_router(encomiendas.router, prefix="/api/v1")
 app.include_router(guardias.router, prefix="/api/v1")
 app.include_router(proveedores.router, prefix="/api/v1")
 app.include_router(ley21442.router, prefix="/api/v1")
+app.include_router(reportes.router, prefix="/api/v1")
 
 
 @app.get("/health")

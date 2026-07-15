@@ -146,7 +146,7 @@ export const MODULOS: Modulo[] = [
     icon: "fa-clipboard-list",
     name: "Reportes",
     description: "Informes para juntas de copropietarios.",
-    status: "proximamente",
+    status: "activo",
   },
   {
     slug: "multi-condominio",

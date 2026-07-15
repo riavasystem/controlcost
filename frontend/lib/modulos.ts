@@ -114,7 +114,7 @@ export const MODULOS: Modulo[] = [
     icon: "fa-screwdriver-wrench",
     name: "Proveedores",
     description: "Directorio de servicios externos.",
-    status: "proximamente",
+    status: "activo",
   },
   {
     slug: "ley-21442",

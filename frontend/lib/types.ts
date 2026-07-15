@@ -169,3 +169,12 @@ export type TurnoGuardia = {
   hora_inicio: string;
   hora_fin: string;
 };
+
+export type Proveedor = {
+  id: string;
+  nombre_empresa: string;
+  rubro: string;
+  contacto_nombre: string | null;
+  telefono: string | null;
+  email: string | null;
+};

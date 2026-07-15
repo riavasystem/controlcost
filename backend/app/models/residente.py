@@ -26,6 +26,7 @@ class Residente(Base):
     nombre: Mapped[str] = mapped_column(String(200), nullable=False)
     rut: Mapped[str | None] = mapped_column(String(20), nullable=True)
     telefono: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     tipo: Mapped[TipoResidente] = mapped_column(Enum(TipoResidente, name="tipo_residente"), nullable=False)
 
     unidad: Mapped["Unidad"] = relationship(back_populates="residentes")  # noqa: F821

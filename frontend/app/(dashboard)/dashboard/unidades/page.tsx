@@ -1,13 +1,142 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import type { Unidad } from "@/lib/types";
+import { useEffect, useState } from "react";
+import type { Condominio, Unidad } from "@/lib/types";
 
 async function fetchUnidades(): Promise<Unidad[]> {
   const response = await fetch("/api/unidades");
   if (!response.ok) throw new Error("No se pudieron cargar las unidades");
   return response.json();
+}
+
+async function fetchCondominio(): Promise<Condominio> {
+  const response = await fetch("/api/condominio");
+  if (!response.ok) throw new Error("No se pudo cargar el condominio");
+  return response.json();
+}
+
+function imagenSrc(imagenUrl: string | null): string | null {
+  if (!imagenUrl) return null;
+  return `/api/uploads/${imagenUrl.replace(/^\/uploads\//, "")}`;
+}
+
+function CondominioForm() {
+  const queryClient = useQueryClient();
+  const { data: condominio } = useQuery({ queryKey: ["condominio"], queryFn: fetchCondominio });
+
+  const [nombre, setNombre] = useState("");
+  const [direccion, setDireccion] = useState("");
+  const [comuna, setComuna] = useState("");
+  const [ciudad, setCiudad] = useState("");
+  const [imagen, setImagen] = useState<File | null>(null);
+  const [inicializado, setInicializado] = useState(false);
+  const [mensaje, setMensaje] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!condominio || inicializado) return;
+    setNombre(condominio.nombre);
+    setDireccion(condominio.direccion ?? "");
+    setComuna(condominio.comuna ?? "");
+    setCiudad(condominio.ciudad ?? "");
+    setInicializado(true);
+  }, [condominio, inicializado]);
+
+  const guardar = useMutation({
+    mutationFn: async () => {
+      const formData = new FormData();
+      formData.set("nombre", nombre);
+      formData.set("direccion", direccion);
+      formData.set("comuna", comuna);
+      formData.set("ciudad", ciudad);
+      if (imagen) formData.set("imagen", imagen);
+
+      const response = await fetch("/api/condominio", { method: "PUT", body: formData });
+      if (!response.ok) throw new Error((await response.json()).detail ?? "Error al guardar el condominio");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["condominio"] });
+      setImagen(null);
+      setMensaje("Datos del condominio guardados.");
+    },
+    onError: (e: Error) => setMensaje(e.message),
+  });
+
+  return (
+    <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
+      <h2 className="text-sm font-semibold text-slate-900">Datos del Condominio</h2>
+      <p className="mt-1 text-xs text-slate-500">
+        Esta información aparece en el encabezado del PDF de Gasto Común y en los documentos del condominio.
+      </p>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          guardar.mutate();
+        }}
+        className="mt-4 flex flex-wrap items-end gap-3"
+      >
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Nombre</label>
+          <input
+            required
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            className="w-48 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Dirección</label>
+          <input
+            value={direccion}
+            onChange={(e) => setDireccion(e.target.value)}
+            className="w-56 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Comuna</label>
+          <input
+            value={comuna}
+            onChange={(e) => setComuna(e.target.value)}
+            className="w-36 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Ciudad</label>
+          <input
+            value={ciudad}
+            onChange={(e) => setCiudad(e.target.value)}
+            className="w-36 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Imagen del condominio</label>
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={(e) => setImagen(e.target.files?.[0] ?? null)}
+            className="w-56 rounded-lg border border-slate-300 px-3 py-1.5 text-xs"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={guardar.isPending}
+          className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-60"
+        >
+          {guardar.isPending ? "Guardando..." : "Guardar"}
+        </button>
+      </form>
+      {mensaje && <p className="mt-3 rounded-lg bg-sky-50 px-3 py-2 text-xs text-slate-700">{mensaje}</p>}
+      {condominio && imagenSrc(condominio.imagen_url) && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imagenSrc(condominio.imagen_url)!}
+          alt={condominio.nombre}
+          className="mt-4 h-28 w-auto rounded-lg border border-slate-200 object-cover"
+        />
+      )}
+    </div>
+  );
 }
 
 type FormState = { numero: string; torre: string; metraje: string };
@@ -103,7 +232,11 @@ export default function UnidadesPage() {
       <h1 className="text-2xl font-semibold text-slate-900">Unidades</h1>
       <p className="mt-1 text-slate-500">Departamentos o casas del condominio.</p>
 
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-5">
+      <div className="mt-6">
+        <CondominioForm />
+      </div>
+
+      <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-5">
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">Número</label>
           <input

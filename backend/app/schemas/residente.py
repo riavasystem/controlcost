@@ -1,6 +1,6 @@
 import uuid
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 from app.models.residente import TipoResidente
 
@@ -9,6 +9,7 @@ class ResidenteBase(BaseModel):
     nombre: str = Field(min_length=1, max_length=200)
     rut: str | None = Field(default=None, max_length=20)
     telefono: str | None = Field(default=None, max_length=30)
+    email: EmailStr | None = Field(default=None, max_length=255)
     tipo: TipoResidente
 
 

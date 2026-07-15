@@ -61,6 +61,22 @@ async def test_extraordinario_por_torre_solo_aplica_a_esa_torre(client, admin_us
 
 
 @pytest.mark.asyncio
+async def test_descarga_pdf_del_periodo(client, admin_user, auth_headers):
+    await _crear_unidad(client, auth_headers, "101", 50)
+    creado = await client.post(
+        "/api/v1/gastos-comunes",
+        json={"anio": 2026, "mes": 7, "tarifa_m2": 1000},
+        headers=auth_headers,
+    )
+    periodo_id = creado.json()["id"]
+
+    response = await client.get(f"/api/v1/gastos-comunes/{periodo_id}/pdf", headers=auth_headers)
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert response.content.startswith(b"%PDF")
+
+
+@pytest.mark.asyncio
 async def test_no_permite_periodo_duplicado(client, admin_user, auth_headers):
     await _crear_unidad(client, auth_headers)
     payload = {"anio": 2026, "mes": 7, "tarifa_m2": 1000}

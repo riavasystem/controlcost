@@ -77,6 +77,7 @@ export default function GastosComunesPage() {
   const [form, setForm] = useState<FormState>(FORM_INICIAL);
   const [error, setError] = useState<string | null>(null);
   const [seleccionado, setSeleccionado] = useState<string | null>(null);
+  const [mensajeEnvio, setMensajeEnvio] = useState<string | null>(null);
 
   const { data: detalle, isLoading: cargandoDetalle } = useQuery({
     queryKey: ["gastos-comunes", seleccionado],
@@ -101,6 +102,28 @@ export default function GastosComunesPage() {
       setSeleccionado(creado.id);
     },
     onError: (e: Error) => setError(e.message),
+  });
+
+  const enviarAPropietarios = useMutation({
+    mutationFn: async (periodo: PeriodoGastoComunDetalle) => {
+      const response = await fetch(`/api/gastos-comunes/${periodo.id}/pdf`);
+      if (!response.ok) throw new Error("No se pudo generar el PDF del período");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const enlace = document.createElement("a");
+      enlace.href = url;
+      enlace.download = `gasto-comun-${periodo.anio}-${String(periodo.mes).padStart(2, "0")}.pdf`;
+      enlace.click();
+      URL.revokeObjectURL(url);
+    },
+    onSuccess: () => {
+      setMensajeEnvio(
+        "Se generó el Gasto Común correspondiente en PDF (se descargó en tu equipo). Aún no tenemos un correo " +
+          "configurado, así que todavía no se envía automáticamente a los propietarios — puedes reenviarles el PDF " +
+          "manualmente mientras tanto.",
+      );
+    },
+    onError: () => setMensajeEnvio("No se pudo generar el PDF del período. Intenta nuevamente."),
   });
 
   const eliminar = useMutation({
@@ -295,7 +318,10 @@ export default function GastosComunesPage() {
               {periodos?.map((p) => (
                 <tr
                   key={p.id}
-                  onClick={() => setSeleccionado(p.id)}
+                  onClick={() => {
+                    setSeleccionado(p.id);
+                    setMensajeEnvio(null);
+                  }}
                   className={`cursor-pointer border-t border-slate-100 ${
                     seleccionado === p.id ? "bg-slate-50" : "hover:bg-slate-50"
                   }`}
@@ -329,10 +355,25 @@ export default function GastosComunesPage() {
           {seleccionado && cargandoDetalle && <p className="text-sm text-slate-400">Cargando detalle...</p>}
           {seleccionado && detalle && (
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">
-                Detalle {MESES[detalle.mes - 1]} {detalle.anio}
-              </h2>
-              <p className="mt-1 text-xs text-slate-500">
+              <div className="flex items-start justify-between gap-3">
+                <h2 className="text-sm font-semibold text-slate-900">
+                  Detalle {MESES[detalle.mes - 1]} {detalle.anio}
+                </h2>
+                <button
+                  onClick={() => {
+                    setMensajeEnvio(null);
+                    enviarAPropietarios.mutate(detalle);
+                  }}
+                  disabled={enviarAPropietarios.isPending}
+                  className="shrink-0 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-60"
+                >
+                  {enviarAPropietarios.isPending ? "Generando..." : "Enviar a propietarios"}
+                </button>
+              </div>
+              {mensajeEnvio && (
+                <p className="mt-2 rounded-lg bg-sky-50 px-3 py-2 text-xs text-slate-700">{mensajeEnvio}</p>
+              )}
+              <p className="mt-2 text-xs text-slate-500">
                 Tarifa ${detalle.tarifa_m2}/m² · Cobro Extra {formatMonto(detalle.extraordinario)}
                 {detalle.extraordinario_torre ? ` (solo ${detalle.extraordinario_torre})` : " (todas las unidades)"}
                 {detalle.descripcion ? ` · ${detalle.descripcion}` : ""}

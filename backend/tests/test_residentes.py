@@ -26,6 +26,36 @@ async def test_crear_y_listar_residente(client, admin_user, auth_headers):
 
 
 @pytest.mark.asyncio
+async def test_crear_residente_con_email(client, admin_user, auth_headers):
+    unidad_id = await _crear_unidad(client, auth_headers)
+
+    response = await client.post(
+        "/api/v1/residentes",
+        json={
+            "unidad_id": unidad_id,
+            "nombre": "Juan Pérez",
+            "tipo": "propietario",
+            "email": "juan.perez@example.com",
+        },
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+    assert response.json()["email"] == "juan.perez@example.com"
+
+
+@pytest.mark.asyncio
+async def test_crear_residente_con_email_invalido(client, admin_user, auth_headers):
+    unidad_id = await _crear_unidad(client, auth_headers)
+
+    response = await client.post(
+        "/api/v1/residentes",
+        json={"unidad_id": unidad_id, "nombre": "Juan Pérez", "tipo": "propietario", "email": "no-es-un-email"},
+        headers=auth_headers,
+    )
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_crear_residente_con_unidad_inexistente(client, admin_user, auth_headers):
     response = await client.post(
         "/api/v1/residentes",

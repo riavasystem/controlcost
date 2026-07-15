@@ -22,6 +22,7 @@ def _to_out(residente: Residente) -> ResidenteOut:
         nombre=residente.nombre,
         rut=residente.rut,
         telefono=residente.telefono,
+        email=residente.email,
         tipo=residente.tipo,
         unidad_numero=residente.unidad.numero if residente.unidad else None,
         unidad_torre=residente.unidad.torre if residente.unidad else None,

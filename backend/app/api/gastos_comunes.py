@@ -2,12 +2,14 @@ import uuid
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from app.core.database import get_db
 from app.core.dependencies import require_roles
+from app.models.condominio import Condominio
 from app.models.gasto_comun import CargoUnidad, PeriodoGastoComun
 from app.models.unidad import Unidad
 from app.models.usuario import UserRole, Usuario
@@ -17,6 +19,7 @@ from app.schemas.gasto_comun import (
     PeriodoGastoComunDetalleOut,
     PeriodoGastoComunOut,
 )
+from app.services.pdf import generar_pdf_periodo
 
 router = APIRouter(prefix="/gastos-comunes", tags=["gastos-comunes"])
 
@@ -162,6 +165,26 @@ async def obtener_periodo(
     periodo = await _get_periodo_o_404(db, periodo_id, current_user.condominio_id)
     base = _periodo_to_out(periodo)
     return PeriodoGastoComunDetalleOut(**base.model_dump(), cargos=_cargos_detalle(periodo))
+
+
+@router.get("/{periodo_id}/pdf")
+async def descargar_pdf_periodo(
+    periodo_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: Usuario = Depends(require_roles(UserRole.ADMIN, UserRole.CONTADOR)),
+) -> Response:
+    periodo = await _get_periodo_o_404(db, periodo_id, current_user.condominio_id)
+    condominio = await db.get(Condominio, current_user.condominio_id)
+    if condominio is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Condominio no encontrado")
+
+    pdf_bytes = generar_pdf_periodo(condominio, periodo)
+    nombre_archivo = f"gasto-comun-{periodo.anio}-{periodo.mes:02d}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{nombre_archivo}"'},
+    )
 
 
 @router.delete("/{periodo_id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -16,8 +16,22 @@ async function fetchUnidades(): Promise<Unidad[]> {
   return response.json();
 }
 
-type FormState = { unidad_id: string; nombre: string; rut: string; telefono: string; tipo: TipoResidente };
-const FORM_INICIAL: FormState = { unidad_id: "", nombre: "", rut: "", telefono: "", tipo: "propietario" };
+type FormState = {
+  unidad_id: string;
+  nombre: string;
+  rut: string;
+  telefono: string;
+  email: string;
+  tipo: TipoResidente;
+};
+const FORM_INICIAL: FormState = {
+  unidad_id: "",
+  nombre: "",
+  rut: "",
+  telefono: "",
+  email: "",
+  tipo: "propietario",
+};
 
 export default function ResidentesPage() {
   const queryClient = useQueryClient();
@@ -34,6 +48,7 @@ export default function ResidentesPage() {
       nombre: f.nombre,
       rut: f.rut || null,
       telefono: f.telefono || null,
+      email: f.email || null,
       tipo: f.tipo,
     };
   }
@@ -111,6 +126,7 @@ export default function ResidentesPage() {
       nombre: residente.nombre,
       rut: residente.rut ?? "",
       telefono: residente.telefono ?? "",
+      email: residente.email ?? "",
       tipo: residente.tipo,
     });
   }
@@ -170,6 +186,16 @@ export default function ResidentesPage() {
           />
         </div>
         <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Correo</label>
+          <input
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+            placeholder="para enviar el gasto común"
+            className="w-52 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">Tipo</label>
           <select
             value={form.tipo}
@@ -204,6 +230,7 @@ export default function ResidentesPage() {
               <th className="px-5 py-3">Unidad</th>
               <th className="px-5 py-3">RUT</th>
               <th className="px-5 py-3">Teléfono</th>
+              <th className="px-5 py-3">Correo</th>
               <th className="px-5 py-3">Tipo</th>
               <th className="px-5 py-3" />
             </tr>
@@ -211,12 +238,12 @@ export default function ResidentesPage() {
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={6} className="px-5 py-6 text-center text-slate-400">Cargando...</td>
+                <td colSpan={7} className="px-5 py-6 text-center text-slate-400">Cargando...</td>
               </tr>
             )}
             {!isLoading && residentes?.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-5 py-6 text-center text-slate-400">Sin residentes registrados todavía.</td>
+                <td colSpan={7} className="px-5 py-6 text-center text-slate-400">Sin residentes registrados todavía.</td>
               </tr>
             )}
             {residentes?.map((r) => (
@@ -228,6 +255,7 @@ export default function ResidentesPage() {
                 </td>
                 <td className="px-5 py-3 text-slate-600">{r.rut ?? "—"}</td>
                 <td className="px-5 py-3 text-slate-600">{r.telefono ?? "—"}</td>
+                <td className="px-5 py-3 text-slate-600">{r.email ?? "—"}</td>
                 <td className="px-5 py-3 text-slate-600 capitalize">{r.tipo}</td>
                 <td className="px-5 py-3 text-right">
                   <button onClick={() => editar(r)} className="mr-3 text-slate-500 hover:text-slate-900">

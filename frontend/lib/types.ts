@@ -1,3 +1,13 @@
+export type Condominio = {
+  id: string;
+  nombre: string;
+  rut: string | null;
+  direccion: string | null;
+  comuna: string | null;
+  ciudad: string | null;
+  imagen_url: string | null;
+};
+
 export type Unidad = {
   id: string;
   condominio_id: string;
@@ -16,6 +26,7 @@ export type Residente = {
   nombre: string;
   rut: string | null;
   telefono: string | null;
+  email: string | null;
   tipo: TipoResidente;
   unidad_numero: string | null;
   unidad_torre: string | null;

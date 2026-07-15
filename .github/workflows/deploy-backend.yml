@@ -29,6 +29,9 @@ jobs:
 
             ln -sfn "$APP_DIR/shared/.env" "$RELEASE/backend/.env"
 
+            mkdir -p "$APP_DIR/shared/uploads"
+            ln -sfn "$APP_DIR/shared/uploads" "$RELEASE/backend/uploads"
+
             source "$APP_DIR/shared/venv/bin/activate"
             pip install -q -r "$RELEASE/backend/requirements.txt"
 

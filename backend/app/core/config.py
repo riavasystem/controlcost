@@ -16,6 +16,7 @@ class Settings(BaseSettings):
 
     frontend_url: str = "http://localhost:3000"
     cookie_domain: str = ""
+    uploads_dir: str = "uploads"
 
     model_config = {"env_file": ".env"}
 

@@ -8,3 +8,4 @@ venv/
 .ruff_cache/
 htmlcov/
 .coverage
+/uploads

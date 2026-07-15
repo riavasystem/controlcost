@@ -82,7 +82,7 @@ export const MODULOS: Modulo[] = [
     icon: "fa-clock",
     name: "Control Visitas",
     description: "Registro entrada/salida con alerta de +8 horas.",
-    status: "proximamente",
+    status: "activo",
   },
   {
     slug: "vehiculos",

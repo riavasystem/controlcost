@@ -114,3 +114,15 @@ export type Comunicado = {
   autor_nombre: string;
   created_at: string;
 };
+
+export type Visita = {
+  id: string;
+  unidad_id: string;
+  unidad_numero: string;
+  unidad_torre: string | null;
+  nombre_visitante: string;
+  rut_visitante: string | null;
+  hora_entrada: string;
+  hora_salida: string | null;
+  alerta: boolean;
+};

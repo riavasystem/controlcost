@@ -178,3 +178,16 @@ export type Proveedor = {
   telefono: string | null;
   email: string | null;
 };
+
+export type ResumenLey21442 = {
+  total_residentes: number;
+  total_unidades: number;
+  periodos_gasto_comun: number;
+  total_recaudado_historico: string;
+  total_pendiente_historico: string;
+  balance_financiero: string;
+  total_visitas_registradas: number;
+  total_vehiculos_registrados: number;
+  total_proveedores_registrados: number;
+  total_turnos_guardia: number;
+};

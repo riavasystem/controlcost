@@ -122,7 +122,7 @@ export const MODULOS: Modulo[] = [
     icon: "fa-scale-balanced",
     name: "Ley 21.442",
     description: "Cumplimiento normativo completo.",
-    status: "proximamente",
+    status: "activo",
   },
   {
     slug: "pagos-online",

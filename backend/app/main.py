@@ -8,6 +8,7 @@ from app.api import (
     finanzas,
     gastos_comunes,
     guardias,
+    ley21442,
     multas,
     pagos,
     proveedores,
@@ -46,6 +47,7 @@ app.include_router(vehiculos.router, prefix="/api/v1")
 app.include_router(encomiendas.router, prefix="/api/v1")
 app.include_router(guardias.router, prefix="/api/v1")
 app.include_router(proveedores.router, prefix="/api/v1")
+app.include_router(ley21442.router, prefix="/api/v1")
 
 
 @app.get("/health")

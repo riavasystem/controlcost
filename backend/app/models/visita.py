@@ -23,6 +23,7 @@ class Visita(Base):
     )
     nombre_visitante: Mapped[str] = mapped_column(String(200), nullable=False)
     rut_visitante: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    numero_estacionamiento: Mapped[str | None] = mapped_column(String(50), nullable=True)
     hora_entrada: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     hora_salida: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 

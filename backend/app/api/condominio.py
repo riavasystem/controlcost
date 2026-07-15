@@ -34,6 +34,7 @@ async def actualizar_condominio(
     direccion: str | None = Form(default=None),
     comuna: str | None = Form(default=None),
     ciudad: str | None = Form(default=None),
+    estacionamientos_visita: int | None = Form(default=None),
     imagen: UploadFile | None = File(default=None),
     db: AsyncSession = Depends(get_db),
     current_user: Usuario = Depends(require_roles(UserRole.ADMIN)),
@@ -47,6 +48,7 @@ async def actualizar_condominio(
     condominio.direccion = direccion or None
     condominio.comuna = comuna or None
     condominio.ciudad = ciudad or None
+    condominio.estacionamientos_visita = estacionamientos_visita
 
     if imagen is not None and imagen.filename:
         extension = Path(imagen.filename).suffix.lower()

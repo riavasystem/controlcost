@@ -28,6 +28,7 @@ def _to_out(visita: Visita) -> VisitaOut:
         unidad_torre=visita.unidad.torre,
         nombre_visitante=visita.nombre_visitante,
         rut_visitante=visita.rut_visitante,
+        numero_estacionamiento=visita.numero_estacionamiento,
         hora_entrada=visita.hora_entrada,
         hora_salida=visita.hora_salida,
         alerta=alerta,
@@ -69,6 +70,7 @@ async def registrar_entrada(
         unidad_id=unidad.id,
         nombre_visitante=payload.nombre_visitante,
         rut_visitante=payload.rut_visitante,
+        numero_estacionamiento=payload.numero_estacionamiento,
     )
     db.add(visita)
     await db.commit()

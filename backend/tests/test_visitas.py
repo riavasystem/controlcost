@@ -26,6 +26,19 @@ async def test_registrar_entrada_y_listar(client, admin_user, auth_headers):
 
 
 @pytest.mark.asyncio
+async def test_registrar_entrada_con_numero_estacionamiento(client, admin_user, auth_headers):
+    unidad_id = await _crear_unidad(client, auth_headers)
+
+    response = await client.post(
+        "/api/v1/visitas",
+        json={"unidad_id": unidad_id, "nombre_visitante": "Juan Pérez", "numero_estacionamiento": "V-4"},
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+    assert response.json()["numero_estacionamiento"] == "V-4"
+
+
+@pytest.mark.asyncio
 async def test_no_permite_visita_con_unidad_inexistente(client, admin_user, auth_headers):
     response = await client.post(
         "/api/v1/visitas",

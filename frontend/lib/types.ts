@@ -6,6 +6,7 @@ export type Condominio = {
   comuna: string | null;
   ciudad: string | null;
   imagen_url: string | null;
+  estacionamientos_visita: number | null;
 };
 
 export type Unidad = {
@@ -27,6 +28,8 @@ export type Residente = {
   rut: string | null;
   telefono: string | null;
   email: string | null;
+  numero_estacionamiento: string | null;
+  numero_bodega: string | null;
   tipo: TipoResidente;
   unidad_numero: string | null;
   unidad_torre: string | null;
@@ -134,6 +137,7 @@ export type Visita = {
   unidad_torre: string | null;
   nombre_visitante: string;
   rut_visitante: string | null;
+  numero_estacionamiento: string | null;
   hora_entrada: string;
   hora_salida: string | null;
   alerta: boolean;

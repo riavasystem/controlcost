@@ -29,6 +29,7 @@ function CondominioForm() {
   const [direccion, setDireccion] = useState("");
   const [comuna, setComuna] = useState("");
   const [ciudad, setCiudad] = useState("");
+  const [estacionamientosVisita, setEstacionamientosVisita] = useState("");
   const [imagen, setImagen] = useState<File | null>(null);
   const [inicializado, setInicializado] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
@@ -39,6 +40,7 @@ function CondominioForm() {
     setDireccion(condominio.direccion ?? "");
     setComuna(condominio.comuna ?? "");
     setCiudad(condominio.ciudad ?? "");
+    setEstacionamientosVisita(condominio.estacionamientos_visita?.toString() ?? "");
     setInicializado(true);
   }, [condominio, inicializado]);
 
@@ -49,6 +51,7 @@ function CondominioForm() {
       formData.set("direccion", direccion);
       formData.set("comuna", comuna);
       formData.set("ciudad", ciudad);
+      if (estacionamientosVisita) formData.set("estacionamientos_visita", estacionamientosVisita);
       if (imagen) formData.set("imagen", imagen);
 
       const response = await fetch("/api/condominio", { method: "PUT", body: formData });
@@ -107,6 +110,16 @@ function CondominioForm() {
             value={ciudad}
             onChange={(e) => setCiudad(e.target.value)}
             className="w-36 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Estacionamientos de visita</label>
+          <input
+            type="number"
+            min={0}
+            value={estacionamientosVisita}
+            onChange={(e) => setEstacionamientosVisita(e.target.value)}
+            className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
         <div>

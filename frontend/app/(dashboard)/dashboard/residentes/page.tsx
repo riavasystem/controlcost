@@ -22,6 +22,8 @@ type FormState = {
   rut: string;
   telefono: string;
   email: string;
+  numero_estacionamiento: string;
+  numero_bodega: string;
   tipo: TipoResidente;
 };
 const FORM_INICIAL: FormState = {
@@ -30,6 +32,8 @@ const FORM_INICIAL: FormState = {
   rut: "",
   telefono: "",
   email: "",
+  numero_estacionamiento: "",
+  numero_bodega: "",
   tipo: "propietario",
 };
 
@@ -49,6 +53,8 @@ export default function ResidentesPage() {
       rut: f.rut || null,
       telefono: f.telefono || null,
       email: f.email || null,
+      numero_estacionamiento: f.numero_estacionamiento || null,
+      numero_bodega: f.numero_bodega || null,
       tipo: f.tipo,
     };
   }
@@ -127,6 +133,8 @@ export default function ResidentesPage() {
       rut: residente.rut ?? "",
       telefono: residente.telefono ?? "",
       email: residente.email ?? "",
+      numero_estacionamiento: residente.numero_estacionamiento ?? "",
+      numero_bodega: residente.numero_bodega ?? "",
       tipo: residente.tipo,
     });
   }
@@ -196,6 +204,22 @@ export default function ResidentesPage() {
           />
         </div>
         <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">N° Estacionamiento</label>
+          <input
+            value={form.numero_estacionamiento}
+            onChange={(e) => setForm((f) => ({ ...f, numero_estacionamiento: e.target.value }))}
+            className="w-32 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">N° Bodega</label>
+          <input
+            value={form.numero_bodega}
+            onChange={(e) => setForm((f) => ({ ...f, numero_bodega: e.target.value }))}
+            className="w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">Tipo</label>
           <select
             value={form.tipo}
@@ -231,6 +255,8 @@ export default function ResidentesPage() {
               <th className="px-5 py-3">RUT</th>
               <th className="px-5 py-3">Teléfono</th>
               <th className="px-5 py-3">Correo</th>
+              <th className="px-5 py-3">N° Estac.</th>
+              <th className="px-5 py-3">N° Bodega</th>
               <th className="px-5 py-3">Tipo</th>
               <th className="px-5 py-3" />
             </tr>
@@ -238,12 +264,12 @@ export default function ResidentesPage() {
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={7} className="px-5 py-6 text-center text-slate-400">Cargando...</td>
+                <td colSpan={9} className="px-5 py-6 text-center text-slate-400">Cargando...</td>
               </tr>
             )}
             {!isLoading && residentes?.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-5 py-6 text-center text-slate-400">Sin residentes registrados todavía.</td>
+                <td colSpan={9} className="px-5 py-6 text-center text-slate-400">Sin residentes registrados todavía.</td>
               </tr>
             )}
             {residentes?.map((r) => (
@@ -256,6 +282,8 @@ export default function ResidentesPage() {
                 <td className="px-5 py-3 text-slate-600">{r.rut ?? "—"}</td>
                 <td className="px-5 py-3 text-slate-600">{r.telefono ?? "—"}</td>
                 <td className="px-5 py-3 text-slate-600">{r.email ?? "—"}</td>
+                <td className="px-5 py-3 text-slate-600">{r.numero_estacionamiento ?? "—"}</td>
+                <td className="px-5 py-3 text-slate-600">{r.numero_bodega ?? "—"}</td>
                 <td className="px-5 py-3 text-slate-600 capitalize">{r.tipo}</td>
                 <td className="px-5 py-3 text-right">
                   <button onClick={() => editar(r)} className="mr-3 text-slate-500 hover:text-slate-900">

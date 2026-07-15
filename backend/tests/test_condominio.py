@@ -17,6 +17,7 @@ async def test_actualizar_condominio_sin_imagen(client, admin_user, auth_headers
             "direccion": "Av. Siempre Viva 123",
             "comuna": "Providencia",
             "ciudad": "Santiago",
+            "estacionamientos_visita": "10",
         },
         headers=auth_headers,
     )
@@ -25,6 +26,7 @@ async def test_actualizar_condominio_sin_imagen(client, admin_user, auth_headers
     assert body["nombre"] == "Condominio Los Aromos"
     assert body["comuna"] == "Providencia"
     assert body["ciudad"] == "Santiago"
+    assert body["estacionamientos_visita"] == 10
     assert body["imagen_url"] is None
 
 

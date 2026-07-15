@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import type { Unidad, Visita } from "@/lib/types";
+import type { Condominio, Unidad, Visita } from "@/lib/types";
 
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url);
@@ -14,8 +14,18 @@ function formatHora(valor: string) {
   return new Date(valor).toLocaleString("es-CL");
 }
 
-type FormState = { unidad_id: string; nombre_visitante: string; rut_visitante: string };
-const FORM_INICIAL: FormState = { unidad_id: "", nombre_visitante: "", rut_visitante: "" };
+type FormState = {
+  unidad_id: string;
+  nombre_visitante: string;
+  rut_visitante: string;
+  numero_estacionamiento: string;
+};
+const FORM_INICIAL: FormState = {
+  unidad_id: "",
+  nombre_visitante: "",
+  rut_visitante: "",
+  numero_estacionamiento: "",
+};
 
 export default function VisitasPage() {
   const queryClient = useQueryClient();
@@ -23,6 +33,10 @@ export default function VisitasPage() {
   const [error, setError] = useState<string | null>(null);
 
   const { data: unidades } = useQuery({ queryKey: ["unidades"], queryFn: () => fetchJson<Unidad[]>("/api/unidades") });
+  const { data: condominio } = useQuery({
+    queryKey: ["condominio"],
+    queryFn: () => fetchJson<Condominio>("/api/condominio"),
+  });
   const { data: visitas, isLoading } = useQuery({
     queryKey: ["visitas"],
     queryFn: () => fetchJson<Visita[]>("/api/visitas"),
@@ -38,6 +52,7 @@ export default function VisitasPage() {
           unidad_id: form.unidad_id,
           nombre_visitante: form.nombre_visitante,
           rut_visitante: form.rut_visitante || null,
+          numero_estacionamiento: form.numero_estacionamiento || null,
         }),
       });
       if (!response.ok) throw new Error((await response.json()).detail ?? "Error al registrar la entrada");
@@ -125,6 +140,17 @@ export default function VisitasPage() {
             className="w-32 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">
+            N° Estacionamiento de visita
+            {condominio?.estacionamientos_visita ? ` (1-${condominio.estacionamientos_visita})` : ""}
+          </label>
+          <input
+            value={form.numero_estacionamiento}
+            onChange={(e) => setForm((f) => ({ ...f, numero_estacionamiento: e.target.value }))}
+            className="w-40 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
         <button
           type="submit"
           disabled={registrarEntrada.isPending}
@@ -142,6 +168,7 @@ export default function VisitasPage() {
             <tr>
               <th className="px-5 py-3">Visitante</th>
               <th className="px-5 py-3">Unidad</th>
+              <th className="px-5 py-3">N° Estac.</th>
               <th className="px-5 py-3">Entrada</th>
               <th className="px-5 py-3">Salida</th>
               <th className="px-5 py-3" />
@@ -150,14 +177,14 @@ export default function VisitasPage() {
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={5} className="px-5 py-6 text-center text-slate-400">
+                <td colSpan={6} className="px-5 py-6 text-center text-slate-400">
                   Cargando...
                 </td>
               </tr>
             )}
             {!isLoading && visitas?.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-6 text-center text-slate-400">
+                <td colSpan={6} className="px-5 py-6 text-center text-slate-400">
                   Aún no hay visitas registradas.
                 </td>
               </tr>
@@ -176,6 +203,7 @@ export default function VisitasPage() {
                   {v.unidad_numero}
                   {v.unidad_torre ? ` (${v.unidad_torre})` : ""}
                 </td>
+                <td className="px-5 py-3 text-slate-600">{v.numero_estacionamiento ?? "—"}</td>
                 <td className="px-5 py-3 text-slate-600">{formatHora(v.hora_entrada)}</td>
                 <td className="px-5 py-3 text-slate-600">
                   {v.hora_salida ? (

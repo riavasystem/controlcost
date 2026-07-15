@@ -10,6 +10,8 @@ class ResidenteBase(BaseModel):
     rut: str | None = Field(default=None, max_length=20)
     telefono: str | None = Field(default=None, max_length=30)
     email: EmailStr | None = Field(default=None, max_length=255)
+    numero_estacionamiento: str | None = Field(default=None, max_length=50)
+    numero_bodega: str | None = Field(default=None, max_length=50)
     tipo: TipoResidente
 
 

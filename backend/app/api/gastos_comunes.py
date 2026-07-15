@@ -45,6 +45,7 @@ def _periodo_to_out(periodo: PeriodoGastoComun) -> PeriodoGastoComunOut:
         mes=periodo.mes,
         tarifa_m2=periodo.tarifa_m2,
         extraordinario=periodo.extraordinario,
+        extraordinario_torre=periodo.extraordinario_torre,
         descripcion=periodo.descripcion,
         total_unidades=len(periodo.cargos),
         total_recaudado=total_recaudado,
@@ -117,6 +118,7 @@ async def crear_periodo(
         mes=payload.mes,
         tarifa_m2=payload.tarifa_m2,
         extraordinario=payload.extraordinario,
+        extraordinario_torre=payload.extraordinario_torre,
         descripcion=payload.descripcion,
     )
     db.add(periodo)
@@ -124,14 +126,18 @@ async def crear_periodo(
     for unidad in unidades:
         metraje = unidad.metraje or Decimal("0")
         monto_base = (payload.tarifa_m2 * Decimal(metraje)).quantize(Decimal("0.01"))
-        monto_total = monto_base + payload.extraordinario
+        aplica_extraordinario = (
+            not payload.extraordinario_torre or unidad.torre == payload.extraordinario_torre
+        )
+        monto_extraordinario = payload.extraordinario if aplica_extraordinario else Decimal("0.00")
+        monto_total = monto_base + monto_extraordinario
         db.add(
             CargoUnidad(
                 id=uuid.uuid4(),
                 periodo_id=periodo.id,
                 unidad_id=unidad.id,
                 monto_base=monto_base,
-                monto_extraordinario=payload.extraordinario,
+                monto_extraordinario=monto_extraordinario,
                 monto_total=monto_total,
                 pagado=False,
             )

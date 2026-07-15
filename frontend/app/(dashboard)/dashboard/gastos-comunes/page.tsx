@@ -1,8 +1,8 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import type { PeriodoGastoComun, PeriodoGastoComunDetalle } from "@/lib/types";
+import { useMemo, useState } from "react";
+import type { PeriodoGastoComun, PeriodoGastoComunDetalle, Unidad } from "@/lib/types";
 
 const MESES = [
   "Enero",
@@ -31,13 +31,29 @@ async function fetchPeriodo(id: string): Promise<PeriodoGastoComunDetalle> {
   return response.json();
 }
 
+async function fetchUnidades(): Promise<Unidad[]> {
+  const response = await fetch("/api/unidades");
+  if (!response.ok) throw new Error("No se pudieron cargar las unidades");
+  return response.json();
+}
+
+const TODAS_LAS_TORRES = "__todas__";
+
 const hoy = new Date();
-type FormState = { anio: string; mes: string; tarifa_m2: string; extraordinario: string; descripcion: string };
+type FormState = {
+  anio: string;
+  mes: string;
+  tarifa_m2: string;
+  extraordinario: string;
+  extraordinario_torre: string;
+  descripcion: string;
+};
 const FORM_INICIAL: FormState = {
   anio: String(hoy.getFullYear()),
   mes: String(hoy.getMonth() + 1),
   tarifa_m2: "",
   extraordinario: "0",
+  extraordinario_torre: TODAS_LAS_TORRES,
   descripcion: "",
 };
 
@@ -48,6 +64,15 @@ function formatMonto(valor: string) {
 export default function GastosComunesPage() {
   const queryClient = useQueryClient();
   const { data: periodos, isLoading } = useQuery({ queryKey: ["gastos-comunes"], queryFn: fetchPeriodos });
+  const { data: unidades } = useQuery({ queryKey: ["unidades"], queryFn: fetchUnidades });
+
+  const torres = useMemo(() => {
+    const set = new Set<string>();
+    for (const u of unidades ?? []) {
+      if (u.torre) set.add(u.torre);
+    }
+    return Array.from(set).sort();
+  }, [unidades]);
 
   const [form, setForm] = useState<FormState>(FORM_INICIAL);
   const [error, setError] = useState<string | null>(null);
@@ -113,6 +138,7 @@ export default function GastosComunesPage() {
       mes: Number(form.mes),
       tarifa_m2: Number(form.tarifa_m2),
       extraordinario: Number(form.extraordinario || 0),
+      extraordinario_torre: form.extraordinario_torre === TODAS_LAS_TORRES ? null : form.extraordinario_torre,
       descripcion: form.descripcion || null,
     });
   }
@@ -165,7 +191,15 @@ export default function GastosComunesPage() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Extraordinario ($)</label>
+          <label className="mb-1 flex items-center gap-1 text-xs font-medium text-slate-600">
+            Cobro Extra ($)
+            <span
+              title="Cobro puntual ej: reparación portón"
+              className="flex h-3.5 w-3.5 cursor-help items-center justify-center rounded-full bg-slate-300 text-[10px] font-bold leading-none text-white"
+            >
+              i
+            </span>
+          </label>
           <input
             type="number"
             step="0.01"
@@ -173,6 +207,21 @@ export default function GastosComunesPage() {
             onChange={(e) => setForm((f) => ({ ...f, extraordinario: e.target.value }))}
             className="w-32 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Torre / Sector</label>
+          <select
+            value={form.extraordinario_torre}
+            onChange={(e) => setForm((f) => ({ ...f, extraordinario_torre: e.target.value }))}
+            className="w-40 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          >
+            <option value={TODAS_LAS_TORRES}>Aplicar a todos</option>
+            {torres.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="min-w-50 flex-1">
           <label className="mb-1 block text-xs font-medium text-slate-600">Descripción (opcional)</label>
@@ -192,6 +241,30 @@ export default function GastosComunesPage() {
       </form>
 
       {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+
+      <div className="mt-4 rounded-2xl border border-sky-100 bg-sky-50 p-4 text-sm text-slate-700">
+        <p className="font-semibold text-slate-900">¿Cómo se calcula el cobro de cada unidad?</p>
+        <ul className="mt-2 list-disc space-y-1 pl-5">
+          <li>
+            <span className="font-medium">Monto base</span> = Tarifa $/m² × metraje de la unidad. Por eso unidades
+            más grandes pagan un gasto común base más alto.
+          </li>
+          <li>
+            <span className="font-medium">Cobro Extra</span> = un monto fijo (no se prorratea por m²) para cobros
+            puntuales aprobados en asamblea que no son parte del gasto común habitual: reparaciones mayores, fondo
+            de reserva, obras, etc. Si el período no tiene ningún cobro extra, se deja en $0.
+          </li>
+          <li>
+            <span className="font-medium">Torre / Sector</span> define a quién se le aplica ese Cobro Extra:
+            puedes elegir una torre/sector específico (ej. solo Torre A, porque solo ahí se rompió el portón) o
+            &quot;Aplicar a todos&quot; para cobrárselo a todas las unidades del condominio.
+          </li>
+          <li>
+            <span className="font-medium">Total a pagar</span> = Monto base + Cobro Extra (si corresponde a esa
+            unidad).
+          </li>
+        </ul>
+      </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
@@ -260,7 +333,8 @@ export default function GastosComunesPage() {
                 Detalle {MESES[detalle.mes - 1]} {detalle.anio}
               </h2>
               <p className="mt-1 text-xs text-slate-500">
-                Tarifa ${detalle.tarifa_m2}/m² · Extraordinario {formatMonto(detalle.extraordinario)}
+                Tarifa ${detalle.tarifa_m2}/m² · Cobro Extra {formatMonto(detalle.extraordinario)}
+                {detalle.extraordinario_torre ? ` (solo ${detalle.extraordinario_torre})` : " (todas las unidades)"}
                 {detalle.descripcion ? ` · ${detalle.descripcion}` : ""}
               </p>
               <div className="mt-4 max-h-96 overflow-y-auto">

@@ -39,6 +39,7 @@ export type PeriodoGastoComun = {
   mes: number;
   tarifa_m2: string;
   extraordinario: string;
+  extraordinario_torre: string | null;
   descripcion: string | null;
   total_unidades: number;
   total_recaudado: string;

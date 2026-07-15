@@ -9,6 +9,7 @@ class PeriodoGastoComunCreate(BaseModel):
     mes: int = Field(ge=1, le=12)
     tarifa_m2: Decimal = Field(gt=0)
     extraordinario: Decimal = Field(default=Decimal("0"), ge=0)
+    extraordinario_torre: str | None = Field(default=None, max_length=100)
     descripcion: str | None = Field(default=None, max_length=300)
 
 
@@ -32,6 +33,7 @@ class PeriodoGastoComunOut(BaseModel):
     mes: int
     tarifa_m2: Decimal
     extraordinario: Decimal
+    extraordinario_torre: str | None
     descripcion: str | None
     total_unidades: int
     total_recaudado: Decimal

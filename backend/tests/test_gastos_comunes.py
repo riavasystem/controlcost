@@ -1,10 +1,10 @@
 import pytest
 
 
-async def _crear_unidad(client, auth_headers, numero="101", metraje=50):
+async def _crear_unidad(client, auth_headers, numero="101", metraje=50, torre=None):
     response = await client.post(
         "/api/v1/unidades",
-        json={"numero": numero, "metraje": metraje},
+        json={"numero": numero, "metraje": metraje, "torre": torre},
         headers=auth_headers,
     )
     assert response.status_code == 201
@@ -30,6 +30,34 @@ async def test_crear_periodo_genera_cargos_por_unidad(client, admin_user, auth_h
     assert cargo_101["monto_base"] == "50000.00"
     assert cargo_101["monto_total"] == "55000.00"
     assert cargo_101["pagado"] is False
+
+
+@pytest.mark.asyncio
+async def test_extraordinario_por_torre_solo_aplica_a_esa_torre(client, admin_user, auth_headers):
+    await _crear_unidad(client, auth_headers, "101", 50, torre="A")
+    await _crear_unidad(client, auth_headers, "201", 50, torre="B")
+
+    response = await client.post(
+        "/api/v1/gastos-comunes",
+        json={
+            "anio": 2026,
+            "mes": 7,
+            "tarifa_m2": 1000,
+            "extraordinario": 5000,
+            "extraordinario_torre": "A",
+        },
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+    body = response.json()
+    assert body["extraordinario_torre"] == "A"
+
+    cargo_a = next(c for c in body["cargos"] if c["unidad_numero"] == "101")
+    cargo_b = next(c for c in body["cargos"] if c["unidad_numero"] == "201")
+    assert cargo_a["monto_extraordinario"] == "5000.00"
+    assert cargo_a["monto_total"] == "55000.00"
+    assert cargo_b["monto_extraordinario"] == "0.00"
+    assert cargo_b["monto_total"] == "50000.00"
 
 
 @pytest.mark.asyncio

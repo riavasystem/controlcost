@@ -24,6 +24,7 @@ class PeriodoGastoComun(Base):
     tarifa_m2: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
     extraordinario: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False, default=0)
     extraordinario_torre: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    considerar_bodega: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     descripcion: Mapped[str | None] = mapped_column(String(300), nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 

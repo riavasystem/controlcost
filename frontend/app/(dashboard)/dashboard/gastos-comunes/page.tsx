@@ -46,6 +46,7 @@ type FormState = {
   tarifa_m2: string;
   extraordinario: string;
   extraordinario_torre: string;
+  considerar_bodega: "si" | "no";
   descripcion: string;
 };
 const FORM_INICIAL: FormState = {
@@ -54,6 +55,7 @@ const FORM_INICIAL: FormState = {
   tarifa_m2: "",
   extraordinario: "0",
   extraordinario_torre: TODAS_LAS_TORRES,
+  considerar_bodega: "no",
   descripcion: "",
 };
 
@@ -162,6 +164,7 @@ export default function GastosComunesPage() {
       tarifa_m2: Number(form.tarifa_m2),
       extraordinario: Number(form.extraordinario || 0),
       extraordinario_torre: form.extraordinario_torre === TODAS_LAS_TORRES ? null : form.extraordinario_torre,
+      considerar_bodega: form.considerar_bodega === "si",
       descripcion: form.descripcion || null,
     });
   }
@@ -246,6 +249,25 @@ export default function GastosComunesPage() {
             ))}
           </select>
         </div>
+        <div>
+          <label className="mb-1 flex items-center gap-1 text-xs font-medium text-slate-600">
+            Considerar Bodega
+            <span
+              title="Considerar el cobro del metraje de bodega en el Gasto Común"
+              className="flex h-3.5 w-3.5 cursor-help items-center justify-center rounded-full bg-slate-300 text-[10px] font-bold leading-none text-white"
+            >
+              i
+            </span>
+          </label>
+          <select
+            value={form.considerar_bodega}
+            onChange={(e) => setForm((f) => ({ ...f, considerar_bodega: e.target.value as "si" | "no" }))}
+            className="w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          >
+            <option value="no">NO</option>
+            <option value="si">SI</option>
+          </select>
+        </div>
         <div className="min-w-50 flex-1">
           <label className="mb-1 block text-xs font-medium text-slate-600">Descripción (opcional)</label>
           <input
@@ -271,6 +293,10 @@ export default function GastosComunesPage() {
           <li>
             <span className="font-medium">Monto base</span> = Tarifa $/m² × metraje de la unidad. Por eso unidades
             más grandes pagan un gasto común base más alto.
+          </li>
+          <li>
+            <span className="font-medium">Considerar Bodega</span> (SI/NO) suma el metraje de la bodega de la
+            unidad al cálculo del monto base. Si se deja en NO, la bodega no se cobra.
           </li>
           <li>
             <span className="font-medium">Cobro Extra</span> = un monto fijo (no se prorratea por m²) para cobros
@@ -376,6 +402,7 @@ export default function GastosComunesPage() {
               <p className="mt-2 text-xs text-slate-500">
                 Tarifa ${detalle.tarifa_m2}/m² · Cobro Extra {formatMonto(detalle.extraordinario)}
                 {detalle.extraordinario_torre ? ` (solo ${detalle.extraordinario_torre})` : " (todas las unidades)"}
+                {" · "}Considerar Bodega: {detalle.considerar_bodega ? "SI" : "NO"}
                 {detalle.descripcion ? ` · ${detalle.descripcion}` : ""}
               </p>
               <div className="mt-4 max-h-96 overflow-y-auto">

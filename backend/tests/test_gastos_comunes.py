@@ -1,10 +1,10 @@
 import pytest
 
 
-async def _crear_unidad(client, auth_headers, numero="101", metraje=50, torre=None):
+async def _crear_unidad(client, auth_headers, numero="101", metraje=50, torre=None, metraje_bodega=None):
     response = await client.post(
         "/api/v1/unidades",
-        json={"numero": numero, "metraje": metraje, "torre": torre},
+        json={"numero": numero, "metraje": metraje, "torre": torre, "metraje_bodega": metraje_bodega},
         headers=auth_headers,
     )
     assert response.status_code == 201
@@ -30,6 +30,36 @@ async def test_crear_periodo_genera_cargos_por_unidad(client, admin_user, auth_h
     assert cargo_101["monto_base"] == "50000.00"
     assert cargo_101["monto_total"] == "55000.00"
     assert cargo_101["pagado"] is False
+
+
+@pytest.mark.asyncio
+async def test_considerar_bodega_suma_metraje_bodega_al_monto_base(client, admin_user, auth_headers):
+    await _crear_unidad(client, auth_headers, "101", metraje=50, metraje_bodega=5)
+
+    response = await client.post(
+        "/api/v1/gastos-comunes",
+        json={"anio": 2026, "mes": 7, "tarifa_m2": 1000, "considerar_bodega": True},
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+    body = response.json()
+    assert body["considerar_bodega"] is True
+    assert body["cargos"][0]["monto_base"] == "55000.00"
+
+
+@pytest.mark.asyncio
+async def test_sin_considerar_bodega_no_suma_metraje_bodega(client, admin_user, auth_headers):
+    await _crear_unidad(client, auth_headers, "101", metraje=50, metraje_bodega=5)
+
+    response = await client.post(
+        "/api/v1/gastos-comunes",
+        json={"anio": 2026, "mes": 7, "tarifa_m2": 1000},
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+    body = response.json()
+    assert body["considerar_bodega"] is False
+    assert body["cargos"][0]["monto_base"] == "50000.00"
 
 
 @pytest.mark.asyncio

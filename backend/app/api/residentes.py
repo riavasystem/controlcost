@@ -24,7 +24,6 @@ def _to_out(residente: Residente) -> ResidenteOut:
         telefono=residente.telefono,
         email=residente.email,
         numero_estacionamiento=residente.numero_estacionamiento,
-        numero_bodega=residente.numero_bodega,
         tipo=residente.tipo,
         unidad_numero=residente.unidad.numero if residente.unidad else None,
         unidad_torre=residente.unidad.torre if residente.unidad else None,

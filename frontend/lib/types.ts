@@ -31,7 +31,6 @@ export type Residente = {
   telefono: string | null;
   email: string | null;
   numero_estacionamiento: string | null;
-  numero_bodega: string | null;
   tipo: TipoResidente;
   unidad_numero: string | null;
   unidad_torre: string | null;
@@ -56,6 +55,7 @@ export type PeriodoGastoComun = {
   tarifa_m2: string;
   extraordinario: string;
   extraordinario_torre: string | null;
+  considerar_bodega: boolean;
   descripcion: string | null;
   total_unidades: number;
   total_recaudado: string;

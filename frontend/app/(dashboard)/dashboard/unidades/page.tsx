@@ -298,6 +298,14 @@ export default function UnidadesPage() {
           />
         </div>
         <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">N° Bodega</label>
+          <input
+            value={form.numero_bodega}
+            onChange={(e) => setForm((f) => ({ ...f, numero_bodega: e.target.value }))}
+            className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">Metraje Bodega (m²)</label>
           <input
             type="number"
@@ -305,14 +313,6 @@ export default function UnidadesPage() {
             value={form.metraje_bodega}
             onChange={(e) => setForm((f) => ({ ...f, metraje_bodega: e.target.value }))}
             className="w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">N° Bodega</label>
-          <input
-            value={form.numero_bodega}
-            onChange={(e) => setForm((f) => ({ ...f, numero_bodega: e.target.value }))}
-            className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
         <button

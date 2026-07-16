@@ -21,7 +21,6 @@ class Unidad(Base):
     metraje: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
     numero_bodega: Mapped[str | None] = mapped_column(String(50), nullable=True)
     metraje_bodega: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
-    estacionamiento_discapacitados: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
     condominio: Mapped["Condominio"] = relationship(back_populates="unidades")  # noqa: F821
     residentes: Mapped[list["Residente"]] = relationship(back_populates="unidad")  # noqa: F821

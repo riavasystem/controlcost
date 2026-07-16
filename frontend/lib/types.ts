@@ -7,6 +7,7 @@ export type Condominio = {
   ciudad: string | null;
   imagen_url: string | null;
   estacionamientos_visita: number | null;
+  estacionamientos_discapacitados: number | null;
 };
 
 export type Unidad = {
@@ -18,7 +19,6 @@ export type Unidad = {
   metraje: string | null;
   numero_bodega: string | null;
   metraje_bodega: string | null;
-  estacionamiento_discapacitados: string | null;
   total_residentes: number;
 };
 

@@ -18,6 +18,7 @@ async def test_actualizar_condominio_sin_imagen(client, admin_user, auth_headers
             "comuna": "Providencia",
             "ciudad": "Santiago",
             "estacionamientos_visita": "10",
+            "estacionamientos_discapacitados": "2",
         },
         headers=auth_headers,
     )
@@ -27,6 +28,7 @@ async def test_actualizar_condominio_sin_imagen(client, admin_user, auth_headers
     assert body["comuna"] == "Providencia"
     assert body["ciudad"] == "Santiago"
     assert body["estacionamientos_visita"] == 10
+    assert body["estacionamientos_discapacitados"] == 2
     assert body["imagen_url"] is None
 
 

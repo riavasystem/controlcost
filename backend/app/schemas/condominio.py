@@ -10,6 +10,7 @@ class CondominioUpdate(BaseModel):
     comuna: str | None = Field(default=None, max_length=100)
     ciudad: str | None = Field(default=None, max_length=100)
     estacionamientos_visita: int | None = Field(default=None, ge=0)
+    estacionamientos_discapacitados: int | None = Field(default=None, ge=0)
 
 
 class CondominioOut(BaseModel):
@@ -21,5 +22,6 @@ class CondominioOut(BaseModel):
     ciudad: str | None
     imagen_url: str | None
     estacionamientos_visita: int | None
+    estacionamientos_discapacitados: int | None
 
     model_config = {"from_attributes": True}

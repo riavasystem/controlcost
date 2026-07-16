@@ -22,6 +22,7 @@ class Condominio(Base):
     ciudad: Mapped[str | None] = mapped_column(String(100), nullable=True)
     imagen_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     estacionamientos_visita: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    estacionamientos_discapacitados: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     usuarios: Mapped[list["Usuario"]] = relationship(back_populates="condominio")  # noqa: F821

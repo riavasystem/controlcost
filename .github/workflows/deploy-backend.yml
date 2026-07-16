@@ -45,7 +45,10 @@ jobs:
             sleep 3
             curl -sf http://127.0.0.1:8001/health || exit 1
 
-            # Conserva solo las últimas 5 releases
-            cd "$APP_DIR/releases" && ls -1t | tail -n +6 | xargs -r rm -rf
+            # Conserva solo las últimas 5 releases. No falla el deploy si algún __pycache__
+            # quedó con permisos del usuario del servicio (systemd corre como otro usuario)
+            # y no se puede borrar por completo; el deploy en sí ya fue exitoso arriba.
+            (cd "$APP_DIR/releases" && ls -1t | tail -n +6 | xargs -r rm -rf) || \
+              echo "Aviso: no se pudieron limpiar por completo algunas releases antiguas (permisos en __pycache__), no es bloqueante"
 
             echo "Deploy exitoso: $RELEASE"

@@ -260,7 +260,7 @@ export default function GastosComunesPage() {
         <div>
           <label className="mb-1 flex items-center gap-1 text-xs font-medium text-slate-600">
             Considerar Bodega
-            <InfoTooltip texto="Considerar el cobro del metraje de bodega en el Gasto Común" />
+            <InfoTooltip texto="¿Considerar el cobro del metraje de bodega en el Gasto Común?" />
           </label>
           <select
             value={form.considerar_bodega}
@@ -308,8 +308,8 @@ export default function GastosComunesPage() {
           </li>
           <li>
             <span className="font-medium">Torre / Sector</span> define a quién se le aplica ese Cobro Extra:
-            puedes elegir una torre/sector específico (ej. solo Torre A, porque solo ahí se rompió el portón) o
-            &quot;Aplicar a todos&quot; para cobrárselo a todas las unidades del condominio.
+            puedes elegir una torre/sector específico (ej. solo Torre 1, porque solo esta torre tiene ascensor) o
+            &quot;Aplicar a todos&quot; para cobrárselo a todas las unidades del condominio, ej: reparación del portón.
           </li>
           <li>
             <span className="font-medium">Total a pagar</span> = Monto base + Cobro Extra (si corresponde a esa

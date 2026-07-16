@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Condominio, Unidad } from "@/lib/types";
 
 async function fetchUnidades(): Promise<Unidad[]> {
@@ -22,27 +22,34 @@ function imagenSrc(imagenUrl: string | null): string | null {
 }
 
 function CondominioForm() {
-  const queryClient = useQueryClient();
   const { data: condominio } = useQuery({ queryKey: ["condominio"], queryFn: fetchCondominio });
 
-  const [nombre, setNombre] = useState("");
-  const [direccion, setDireccion] = useState("");
-  const [comuna, setComuna] = useState("");
-  const [ciudad, setCiudad] = useState("");
-  const [estacionamientosVisita, setEstacionamientosVisita] = useState("");
-  const [imagen, setImagen] = useState<File | null>(null);
-  const [inicializado, setInicializado] = useState(false);
-  const [mensaje, setMensaje] = useState<string | null>(null);
+  if (!condominio) {
+    return (
+      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
+        <h2 className="text-sm font-semibold text-slate-900">Datos del Condominio</h2>
+        <p className="mt-2 text-sm text-slate-400">Cargando...</p>
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    if (!condominio || inicializado) return;
-    setNombre(condominio.nombre);
-    setDireccion(condominio.direccion ?? "");
-    setComuna(condominio.comuna ?? "");
-    setCiudad(condominio.ciudad ?? "");
-    setEstacionamientosVisita(condominio.estacionamientos_visita?.toString() ?? "");
-    setInicializado(true);
-  }, [condominio, inicializado]);
+  // key fuerza el remount si cambian los datos del condominio (ej. tras refetch por otra pestaña),
+  // así el estado interno del formulario siempre parte sincronizado sin necesitar un efecto.
+  return <CondominioFormInner key={condominio.id} condominio={condominio} />;
+}
+
+function CondominioFormInner({ condominio }: { condominio: Condominio }) {
+  const queryClient = useQueryClient();
+
+  const [nombre, setNombre] = useState(condominio.nombre);
+  const [direccion, setDireccion] = useState(condominio.direccion ?? "");
+  const [comuna, setComuna] = useState(condominio.comuna ?? "");
+  const [ciudad, setCiudad] = useState(condominio.ciudad ?? "");
+  const [estacionamientosVisita, setEstacionamientosVisita] = useState(
+    condominio.estacionamientos_visita?.toString() ?? "",
+  );
+  const [imagen, setImagen] = useState<File | null>(null);
+  const [mensaje, setMensaje] = useState<string | null>(null);
 
   const guardar = useMutation({
     mutationFn: async () => {
@@ -140,7 +147,7 @@ function CondominioForm() {
         </button>
       </form>
       {mensaje && <p className="mt-3 rounded-lg bg-sky-50 px-3 py-2 text-xs text-slate-700">{mensaje}</p>}
-      {condominio && imagenSrc(condominio.imagen_url) && (
+      {imagenSrc(condominio.imagen_url) && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={imagenSrc(condominio.imagen_url)!}

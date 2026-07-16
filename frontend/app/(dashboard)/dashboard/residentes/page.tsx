@@ -19,6 +19,7 @@ async function fetchUnidades(): Promise<Unidad[]> {
 type FormState = {
   unidad_id: string;
   nombre: string;
+  apellido: string;
   rut: string;
   telefono: string;
   email: string;
@@ -28,6 +29,7 @@ type FormState = {
 const FORM_INICIAL: FormState = {
   unidad_id: "",
   nombre: "",
+  apellido: "",
   rut: "",
   telefono: "",
   email: "",
@@ -48,6 +50,7 @@ export default function ResidentesPage() {
     return {
       unidad_id: f.unidad_id,
       nombre: f.nombre,
+      apellido: f.apellido || null,
       rut: f.rut || null,
       telefono: f.telefono || null,
       email: f.email || null,
@@ -127,6 +130,7 @@ export default function ResidentesPage() {
     setForm({
       unidad_id: residente.unidad_id,
       nombre: residente.nombre,
+      apellido: residente.apellido ?? "",
       rut: residente.rut ?? "",
       telefono: residente.telefono ?? "",
       email: residente.email ?? "",
@@ -176,7 +180,15 @@ export default function ResidentesPage() {
             required
             value={form.nombre}
             onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
-            className="w-48 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="w-40 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Apellido</label>
+          <input
+            value={form.apellido}
+            onChange={(e) => setForm((f) => ({ ...f, apellido: e.target.value }))}
+            className="w-40 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
         <div>
@@ -245,11 +257,13 @@ export default function ResidentesPage() {
           <thead className="bg-slate-50 text-xs uppercase text-slate-500">
             <tr>
               <th className="px-5 py-3">Nombre</th>
+              <th className="px-5 py-3">Apellido</th>
               <th className="px-5 py-3">Unidad</th>
               <th className="px-5 py-3">RUT</th>
               <th className="px-5 py-3">Teléfono</th>
               <th className="px-5 py-3">Correo</th>
               <th className="px-5 py-3">N° Estac.</th>
+              <th className="px-5 py-3">N° Bodega</th>
               <th className="px-5 py-3">Tipo</th>
               <th className="px-5 py-3" />
             </tr>
@@ -257,17 +271,18 @@ export default function ResidentesPage() {
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={8} className="px-5 py-6 text-center text-slate-400">Cargando...</td>
+                <td colSpan={10} className="px-5 py-6 text-center text-slate-400">Cargando...</td>
               </tr>
             )}
             {!isLoading && residentes?.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-5 py-6 text-center text-slate-400">Sin residentes registrados todavía.</td>
+                <td colSpan={10} className="px-5 py-6 text-center text-slate-400">Sin residentes registrados todavía.</td>
               </tr>
             )}
             {residentes?.map((r) => (
               <tr key={r.id} className="border-t border-slate-100">
                 <td className="px-5 py-3 font-medium text-slate-900">{r.nombre}</td>
+                <td className="px-5 py-3 text-slate-600">{r.apellido ?? "—"}</td>
                 <td className="px-5 py-3 text-slate-600">
                   {r.unidad_torre ? `${r.unidad_torre} - ` : ""}
                   {r.unidad_numero ?? "—"}
@@ -276,6 +291,7 @@ export default function ResidentesPage() {
                 <td className="px-5 py-3 text-slate-600">{r.telefono ?? "—"}</td>
                 <td className="px-5 py-3 text-slate-600">{r.email ?? "—"}</td>
                 <td className="px-5 py-3 text-slate-600">{r.numero_estacionamiento ?? "—"}</td>
+                <td className="px-5 py-3 text-slate-600">{r.unidad_numero_bodega ?? "—"}</td>
                 <td className="px-5 py-3 text-slate-600 capitalize">{r.tipo}</td>
                 <td className="px-5 py-3 text-right">
                   <button onClick={() => editar(r)} className="mr-3 text-slate-500 hover:text-slate-900">

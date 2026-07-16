@@ -27,12 +27,14 @@ export type Residente = {
   id: string;
   unidad_id: string;
   nombre: string;
+  apellido: string | null;
   rut: string | null;
   telefono: string | null;
   email: string | null;
   numero_estacionamiento: string | null;
   tipo: TipoResidente;
   unidad_numero: string | null;
+  unidad_numero_bodega: string | null;
   unidad_torre: string | null;
 };
 

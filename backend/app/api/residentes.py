@@ -20,6 +20,7 @@ def _to_out(residente: Residente) -> ResidenteOut:
         id=residente.id,
         unidad_id=residente.unidad_id,
         nombre=residente.nombre,
+        apellido=residente.apellido,
         rut=residente.rut,
         telefono=residente.telefono,
         email=residente.email,
@@ -27,6 +28,7 @@ def _to_out(residente: Residente) -> ResidenteOut:
         tipo=residente.tipo,
         unidad_numero=residente.unidad.numero if residente.unidad else None,
         unidad_torre=residente.unidad.torre if residente.unidad else None,
+        unidad_numero_bodega=residente.unidad.numero_bodega if residente.unidad else None,
     )
 
 

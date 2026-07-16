@@ -1,8 +1,10 @@
 import pytest
 
 
-async def _crear_unidad(client, auth_headers, numero="101"):
-    response = await client.post("/api/v1/unidades", json={"numero": numero}, headers=auth_headers)
+async def _crear_unidad(client, auth_headers, numero="101", numero_bodega=None):
+    response = await client.post(
+        "/api/v1/unidades", json={"numero": numero, "numero_bodega": numero_bodega}, headers=auth_headers
+    )
     return response.json()["id"]
 
 
@@ -23,6 +25,32 @@ async def test_crear_y_listar_residente(client, admin_user, auth_headers):
     listado = await client.get("/api/v1/residentes", headers=auth_headers)
     assert listado.status_code == 200
     assert len(listado.json()) == 1
+
+
+@pytest.mark.asyncio
+async def test_crear_residente_con_apellido(client, admin_user, auth_headers):
+    unidad_id = await _crear_unidad(client, auth_headers)
+
+    response = await client.post(
+        "/api/v1/residentes",
+        json={"unidad_id": unidad_id, "nombre": "Juan", "apellido": "Pérez", "tipo": "propietario"},
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+    assert response.json()["apellido"] == "Pérez"
+
+
+@pytest.mark.asyncio
+async def test_residente_incluye_bodega_de_su_unidad(client, admin_user, auth_headers):
+    unidad_id = await _crear_unidad(client, auth_headers, numero_bodega="B-7")
+
+    response = await client.post(
+        "/api/v1/residentes",
+        json={"unidad_id": unidad_id, "nombre": "Juan Pérez", "tipo": "propietario"},
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+    assert response.json()["unidad_numero_bodega"] == "B-7"
 
 
 @pytest.mark.asyncio

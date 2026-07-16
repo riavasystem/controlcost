@@ -267,8 +267,8 @@ export default function GastosComunesPage() {
             onChange={(e) => setForm((f) => ({ ...f, considerar_bodega: e.target.value as "si" | "no" }))}
             className="w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           >
-            <option value="no">NO</option>
-            <option value="si">SI</option>
+            <option value="no">No</option>
+            <option value="si">Si</option>
           </select>
         </div>
         <div className="min-w-50 flex-1">
@@ -298,8 +298,8 @@ export default function GastosComunesPage() {
             más grandes pagan un gasto común base más alto.
           </li>
           <li>
-            <span className="font-medium">Considerar Bodega</span> (SI/NO) suma el metraje de la bodega de la
-            unidad al cálculo del monto base. Si se deja en NO, la bodega no se cobra.
+            <span className="font-medium">Considerar Bodega</span> (Si/No) suma el metraje de la bodega de la
+            unidad al cálculo del monto base. Si se deja en No, la bodega no se cobra.
           </li>
           <li>
             <span className="font-medium">Cobro Extra</span> = un monto fijo (no se prorratea por m²) para cobros
@@ -316,6 +316,11 @@ export default function GastosComunesPage() {
             unidad).
           </li>
         </ul>
+        <p className="mt-3">
+          <span className="font-medium">NOTA:</span> Si se selecciona un cobro extra a una (Torre / Sector)
+          específico y no a todos, al generar el GGCC el cobro extra considerará solo a las unidades que
+          pertenecen a la (Torre / Sector) seleccionado, las demás unidades no reflejarán este cobro extra.
+        </p>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -405,7 +410,7 @@ export default function GastosComunesPage() {
               <p className="mt-2 text-xs text-slate-500">
                 Tarifa ${detalle.tarifa_m2}/m² · Cobro Extra {formatMonto(detalle.extraordinario)}
                 {detalle.extraordinario_torre ? ` (solo ${detalle.extraordinario_torre})` : " (todas las unidades)"}
-                {" · "}Considerar Bodega: {detalle.considerar_bodega ? "SI" : "NO"}
+                {" · "}Considerar Bodega: {detalle.considerar_bodega ? "Si" : "No"}
                 {detalle.descripcion ? ` · ${detalle.descripcion}` : ""}
               </p>
               <div className="mt-4 max-h-96 overflow-y-auto">

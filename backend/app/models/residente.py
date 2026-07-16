@@ -24,6 +24,7 @@ class Residente(Base):
         UUID(as_uuid=True), ForeignKey("usuarios.id", ondelete="SET NULL"), nullable=True, unique=True
     )
     nombre: Mapped[str] = mapped_column(String(200), nullable=False)
+    apellido: Mapped[str | None] = mapped_column(String(200), nullable=True)
     rut: Mapped[str | None] = mapped_column(String(20), nullable=True)
     telefono: Mapped[str | None] = mapped_column(String(30), nullable=True)
     email: Mapped[str | None] = mapped_column(String(255), nullable=True)

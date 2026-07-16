@@ -7,6 +7,7 @@ from app.models.residente import TipoResidente
 
 class ResidenteBase(BaseModel):
     nombre: str = Field(min_length=1, max_length=200)
+    apellido: str | None = Field(default=None, max_length=200)
     rut: str | None = Field(default=None, max_length=20)
     telefono: str | None = Field(default=None, max_length=30)
     email: EmailStr | None = Field(default=None, max_length=255)
@@ -27,5 +28,6 @@ class ResidenteOut(ResidenteBase):
     unidad_id: uuid.UUID
     unidad_numero: str | None = None
     unidad_torre: str | None = None
+    unidad_numero_bodega: str | None = None
 
     model_config = {"from_attributes": True}

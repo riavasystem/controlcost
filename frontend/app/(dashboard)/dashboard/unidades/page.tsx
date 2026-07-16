@@ -152,8 +152,20 @@ function CondominioForm() {
   );
 }
 
-type FormState = { numero: string; torre: string; metraje: string };
-const FORM_INICIAL: FormState = { numero: "", torre: "", metraje: "" };
+type FormState = {
+  numero: string;
+  torre: string;
+  metraje: string;
+  numero_bodega: string;
+  metraje_bodega: string;
+};
+const FORM_INICIAL: FormState = {
+  numero: "",
+  torre: "",
+  metraje: "",
+  numero_bodega: "",
+  metraje_bodega: "",
+};
 
 export default function UnidadesPage() {
   const queryClient = useQueryClient();
@@ -168,6 +180,8 @@ export default function UnidadesPage() {
       numero: f.numero,
       torre: f.torre || null,
       metraje: f.metraje ? Number(f.metraje) : null,
+      numero_bodega: f.numero_bodega || null,
+      metraje_bodega: f.metraje_bodega ? Number(f.metraje_bodega) : null,
     };
   }
 
@@ -231,7 +245,13 @@ export default function UnidadesPage() {
 
   function editar(unidad: Unidad) {
     setEditandoId(unidad.id);
-    setForm({ numero: unidad.numero, torre: unidad.torre ?? "", metraje: unidad.metraje ?? "" });
+    setForm({
+      numero: unidad.numero,
+      torre: unidad.torre ?? "",
+      metraje: unidad.metraje ?? "",
+      numero_bodega: unidad.numero_bodega ?? "",
+      metraje_bodega: unidad.metraje_bodega ?? "",
+    });
   }
 
   function cancelarEdicion() {
@@ -268,13 +288,31 @@ export default function UnidadesPage() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Metraje (m²)</label>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Metraje Prop. (m²)</label>
           <input
             type="number"
             step="0.01"
             value={form.metraje}
             onChange={(e) => setForm((f) => ({ ...f, metraje: e.target.value }))}
             className="w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Metraje Bodega (m²)</label>
+          <input
+            type="number"
+            step="0.01"
+            value={form.metraje_bodega}
+            onChange={(e) => setForm((f) => ({ ...f, metraje_bodega: e.target.value }))}
+            className="w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">N° Bodega</label>
+          <input
+            value={form.numero_bodega}
+            onChange={(e) => setForm((f) => ({ ...f, numero_bodega: e.target.value }))}
+            className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
         <button
@@ -299,7 +337,9 @@ export default function UnidadesPage() {
             <tr>
               <th className="px-5 py-3">Número</th>
               <th className="px-5 py-3">Torre</th>
-              <th className="px-5 py-3">Metraje</th>
+              <th className="px-5 py-3">Metraje Prop.</th>
+              <th className="px-5 py-3">N° Bodega</th>
+              <th className="px-5 py-3">Metraje Bodega</th>
               <th className="px-5 py-3">Residentes</th>
               <th className="px-5 py-3" />
             </tr>
@@ -307,12 +347,12 @@ export default function UnidadesPage() {
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={5} className="px-5 py-6 text-center text-slate-400">Cargando...</td>
+                <td colSpan={7} className="px-5 py-6 text-center text-slate-400">Cargando...</td>
               </tr>
             )}
             {!isLoading && unidades?.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-6 text-center text-slate-400">Sin unidades registradas todavía.</td>
+                <td colSpan={7} className="px-5 py-6 text-center text-slate-400">Sin unidades registradas todavía.</td>
               </tr>
             )}
             {unidades?.map((u) => (
@@ -320,6 +360,8 @@ export default function UnidadesPage() {
                 <td className="px-5 py-3 font-medium text-slate-900">{u.numero}</td>
                 <td className="px-5 py-3 text-slate-600">{u.torre ?? "—"}</td>
                 <td className="px-5 py-3 text-slate-600">{u.metraje ? `${u.metraje} m²` : "—"}</td>
+                <td className="px-5 py-3 text-slate-600">{u.numero_bodega ?? "—"}</td>
+                <td className="px-5 py-3 text-slate-600">{u.metraje_bodega ? `${u.metraje_bodega} m²` : "—"}</td>
                 <td className="px-5 py-3 text-slate-600">{u.total_residentes}</td>
                 <td className="px-5 py-3 text-right">
                   <button onClick={() => editar(u)} className="mr-3 text-slate-500 hover:text-slate-900">

@@ -16,6 +16,8 @@ export type Unidad = {
   torre: string | null;
   /** FastAPI serializa Decimal como string (ej. "55.50"), no como number. */
   metraje: string | null;
+  numero_bodega: string | null;
+  metraje_bodega: string | null;
   total_residentes: number;
 };
 

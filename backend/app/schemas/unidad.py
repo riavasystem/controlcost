@@ -8,6 +8,8 @@ class UnidadBase(BaseModel):
     numero: str = Field(min_length=1, max_length=20)
     torre: str | None = Field(default=None, max_length=100)
     metraje: Decimal | None = Field(default=None, gt=0)
+    numero_bodega: str | None = Field(default=None, max_length=50)
+    metraje_bodega: Decimal | None = Field(default=None, gt=0)
 
 
 class UnidadCreate(UnidadBase):

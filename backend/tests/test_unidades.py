@@ -19,6 +19,19 @@ async def test_crear_y_listar_unidad(client, admin_user, auth_headers):
 
 
 @pytest.mark.asyncio
+async def test_crear_unidad_con_bodega(client, admin_user, auth_headers):
+    response = await client.post(
+        "/api/v1/unidades",
+        json={"numero": "101", "numero_bodega": "B-5", "metraje_bodega": 4.5},
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+    body = response.json()
+    assert body["numero_bodega"] == "B-5"
+    assert body["metraje_bodega"] == "4.50"
+
+
+@pytest.mark.asyncio
 async def test_no_permite_numero_duplicado(client, admin_user, auth_headers):
     await client.post("/api/v1/unidades", json={"numero": "101"}, headers=auth_headers)
     response = await client.post("/api/v1/unidades", json={"numero": "101"}, headers=auth_headers)

@@ -22,6 +22,8 @@ async def _to_out(db: AsyncSession, unidad: Unidad) -> UnidadOut:
         numero=unidad.numero,
         torre=unidad.torre,
         metraje=unidad.metraje,
+        numero_bodega=unidad.numero_bodega,
+        metraje_bodega=unidad.metraje_bodega,
         total_residentes=count or 0,
     )
 

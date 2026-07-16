@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Residente, TipoResidente, Unidad } from "@/lib/types";
 
 async function fetchResidentes(): Promise<Residente[]> {
@@ -41,6 +41,14 @@ export default function ResidentesPage() {
   const queryClient = useQueryClient();
   const { data: residentes, isLoading } = useQuery({ queryKey: ["residentes"], queryFn: fetchResidentes });
   const { data: unidades } = useQuery({ queryKey: ["unidades"], queryFn: fetchUnidades });
+
+  const bodegas = useMemo(() => {
+    const set = new Set<string>();
+    for (const u of unidades ?? []) {
+      if (u.numero_bodega) set.add(u.numero_bodega);
+    }
+    return Array.from(set).sort();
+  }, [unidades]);
 
   const [form, setForm] = useState<FormState>(FORM_INICIAL);
   const [editandoId, setEditandoId] = useState<string | null>(null);
@@ -213,11 +221,18 @@ export default function ResidentesPage() {
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">N° Bodega</label>
-          <input
+          <select
             value={form.numero_bodega}
             onChange={(e) => setForm((f) => ({ ...f, numero_bodega: e.target.value }))}
             className="w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          />
+          >
+            <option value="">Sin bodega</option>
+            {bodegas.map((b) => (
+              <option key={b} value={b}>
+                {b}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">Tipo</label>

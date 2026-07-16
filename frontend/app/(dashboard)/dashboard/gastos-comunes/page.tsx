@@ -252,7 +252,7 @@ export default function GastosComunesPage() {
             <option value={TODAS_LAS_TORRES}>Aplicar a todos</option>
             {torres.map((t) => (
               <option key={t} value={t}>
-                {t}
+                {/^\d+$/.test(t) ? `Torre ${t}` : t}
               </option>
             ))}
           </select>
@@ -417,7 +417,7 @@ export default function GastosComunesPage() {
                 <table className="w-full text-left text-sm">
                   <thead className="text-xs uppercase text-slate-500">
                     <tr>
-                      <th className="py-2">Unidad</th>
+                      <th className="py-2">Propiedad</th>
                       <th className="py-2">Total</th>
                       <th className="py-2">Estado</th>
                     </tr>

@@ -24,7 +24,7 @@ export const MODULOS: Modulo[] = [
     slug: "unidades",
     href: "/dashboard/unidades",
     icon: "fa-door-open",
-    name: "Unidades",
+    name: "Propiedades",
     description: "Departamentos, casas y estacionamientos del condominio.",
     status: "activo",
   },

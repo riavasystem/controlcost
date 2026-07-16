@@ -6,7 +6,7 @@ import type { Condominio, Unidad } from "@/lib/types";
 
 async function fetchUnidades(): Promise<Unidad[]> {
   const response = await fetch("/api/unidades");
-  if (!response.ok) throw new Error("No se pudieron cargar las unidades");
+  if (!response.ok) throw new Error("No se pudieron cargar las propiedades");
   return response.json();
 }
 
@@ -120,7 +120,7 @@ function CondominioFormInner({ condominio }: { condominio: Condominio }) {
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Estacionamientos de visita</label>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Estac. Visita</label>
           <input
             type="number"
             min={0}
@@ -165,6 +165,7 @@ type FormState = {
   metraje: string;
   numero_bodega: string;
   metraje_bodega: string;
+  estacionamiento_discapacitados: string;
 };
 const FORM_INICIAL: FormState = {
   numero: "",
@@ -172,25 +173,193 @@ const FORM_INICIAL: FormState = {
   metraje: "",
   numero_bodega: "",
   metraje_bodega: "",
+  estacionamiento_discapacitados: "",
 };
+
+function toPayload(f: FormState) {
+  return {
+    numero: f.numero,
+    torre: f.torre || null,
+    metraje: f.metraje ? Number(f.metraje) : null,
+    numero_bodega: f.numero_bodega || null,
+    metraje_bodega: f.metraje_bodega ? Number(f.metraje_bodega) : null,
+    estacionamiento_discapacitados: f.estacionamiento_discapacitados || null,
+  };
+}
+
+function FilaPropiedad({
+  propiedad,
+  actualizar,
+  eliminar,
+}: {
+  propiedad: Unidad;
+  actualizar: ReturnType<typeof useActualizarUnidad>;
+  eliminar: ReturnType<typeof useEliminarUnidad>;
+}) {
+  const [editando, setEditando] = useState(false);
+  const [campos, setCampos] = useState<FormState>({
+    numero: propiedad.numero,
+    torre: propiedad.torre ?? "",
+    metraje: propiedad.metraje ?? "",
+    numero_bodega: propiedad.numero_bodega ?? "",
+    metraje_bodega: propiedad.metraje_bodega ?? "",
+    estacionamiento_discapacitados: propiedad.estacionamiento_discapacitados ?? "",
+  });
+
+  function cancelar() {
+    setEditando(false);
+    setCampos({
+      numero: propiedad.numero,
+      torre: propiedad.torre ?? "",
+      metraje: propiedad.metraje ?? "",
+      numero_bodega: propiedad.numero_bodega ?? "",
+      metraje_bodega: propiedad.metraje_bodega ?? "",
+      estacionamiento_discapacitados: propiedad.estacionamiento_discapacitados ?? "",
+    });
+  }
+
+  function guardar() {
+    actualizar.mutate(
+      { id: propiedad.id, payload: toPayload(campos) },
+      { onSuccess: () => setEditando(false) },
+    );
+  }
+
+  if (!editando) {
+    return (
+      <tr className="border-t border-slate-100">
+        <td className="px-5 py-3 font-medium text-slate-900">{propiedad.numero}</td>
+        <td className="px-5 py-3 text-slate-600">{propiedad.torre ?? "—"}</td>
+        <td className="px-5 py-3 text-slate-600">{propiedad.metraje ? `${propiedad.metraje} m²` : "—"}</td>
+        <td className="px-5 py-3 text-slate-600">{propiedad.numero_bodega ?? "—"}</td>
+        <td className="px-5 py-3 text-slate-600">
+          {propiedad.metraje_bodega ? `${propiedad.metraje_bodega} m²` : "—"}
+        </td>
+        <td className="px-5 py-3 text-slate-600">{propiedad.estacionamiento_discapacitados ?? "—"}</td>
+        <td className="px-5 py-3 text-slate-600">{propiedad.total_residentes}</td>
+        <td className="px-5 py-3 text-right">
+          <button onClick={() => setEditando(true)} className="mr-3 text-slate-500 hover:text-slate-900">
+            Editar
+          </button>
+          <button
+            onClick={() => {
+              if (confirm(`¿Eliminar la propiedad ${propiedad.numero}?`)) eliminar.mutate(propiedad.id);
+            }}
+            className="text-red-500 hover:text-red-700"
+          >
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    );
+  }
+
+  return (
+    <tr className="border-t border-slate-100 bg-slate-50">
+      <td className="px-3 py-2">
+        <input
+          value={campos.numero}
+          onChange={(e) => setCampos((c) => ({ ...c, numero: e.target.value }))}
+          className="w-20 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2">
+        <input
+          value={campos.torre}
+          onChange={(e) => setCampos((c) => ({ ...c, torre: e.target.value }))}
+          className="w-24 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2">
+        <input
+          type="number"
+          step="0.01"
+          value={campos.metraje}
+          onChange={(e) => setCampos((c) => ({ ...c, metraje: e.target.value }))}
+          className="w-24 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2">
+        <input
+          value={campos.numero_bodega}
+          onChange={(e) => setCampos((c) => ({ ...c, numero_bodega: e.target.value }))}
+          className="w-20 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2">
+        <input
+          type="number"
+          step="0.01"
+          value={campos.metraje_bodega}
+          onChange={(e) => setCampos((c) => ({ ...c, metraje_bodega: e.target.value }))}
+          className="w-24 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2">
+        <input
+          value={campos.estacionamiento_discapacitados}
+          onChange={(e) => setCampos((c) => ({ ...c, estacionamiento_discapacitados: e.target.value }))}
+          className="w-20 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-5 py-3 text-slate-600">{propiedad.total_residentes}</td>
+      <td className="px-3 py-2 text-right">
+        <button
+          onClick={guardar}
+          disabled={actualizar.isPending}
+          className="mr-3 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-60"
+        >
+          Guardar
+        </button>
+        <button onClick={cancelar} className="text-xs text-slate-500 hover:text-slate-900">
+          Cancelar
+        </button>
+      </td>
+    </tr>
+  );
+}
+
+function useActualizarUnidad(queryClient: ReturnType<typeof useQueryClient>, setError: (e: string | null) => void) {
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: ReturnType<typeof toPayload> }) => {
+      const response = await fetch(`/api/unidades/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error((await response.json()).detail ?? "Error al actualizar la propiedad");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["unidades"] });
+      setError(null);
+    },
+    onError: (e: Error) => setError(e.message),
+  });
+}
+
+function useEliminarUnidad(queryClient: ReturnType<typeof useQueryClient>, setError: (e: string | null) => void) {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/unidades/${id}`, { method: "DELETE" });
+      if (!response.ok && response.status !== 204) {
+        throw new Error((await response.json()).detail ?? "Error al eliminar la propiedad");
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["unidades"] }),
+    onError: (e: Error) => setError(e.message),
+  });
+}
 
 export default function UnidadesPage() {
   const queryClient = useQueryClient();
   const { data: unidades, isLoading } = useQuery({ queryKey: ["unidades"], queryFn: fetchUnidades });
 
   const [form, setForm] = useState<FormState>(FORM_INICIAL);
-  const [editandoId, setEditandoId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  function toPayload(f: FormState) {
-    return {
-      numero: f.numero,
-      torre: f.torre || null,
-      metraje: f.metraje ? Number(f.metraje) : null,
-      numero_bodega: f.numero_bodega || null,
-      metraje_bodega: f.metraje_bodega ? Number(f.metraje_bodega) : null,
-    };
-  }
+  const actualizar = useActualizarUnidad(queryClient, setError);
+  const eliminar = useEliminarUnidad(queryClient, setError);
 
   const crear = useMutation({
     mutationFn: async (payload: ReturnType<typeof toPayload>) => {
@@ -199,7 +368,7 @@ export default function UnidadesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error((await response.json()).detail ?? "Error al crear la unidad");
+      if (!response.ok) throw new Error((await response.json()).detail ?? "Error al crear la propiedad");
       return response.json();
     },
     onSuccess: () => {
@@ -207,69 +376,17 @@ export default function UnidadesPage() {
       setForm(FORM_INICIAL);
       setError(null);
     },
-    onError: (e: Error) => setError(e.message),
-  });
-
-  const actualizar = useMutation({
-    mutationFn: async ({ id, payload }: { id: string; payload: ReturnType<typeof toPayload> }) => {
-      const response = await fetch(`/api/unidades/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) throw new Error((await response.json()).detail ?? "Error al actualizar la unidad");
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["unidades"] });
-      setForm(FORM_INICIAL);
-      setEditandoId(null);
-      setError(null);
-    },
-    onError: (e: Error) => setError(e.message),
-  });
-
-  const eliminar = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`/api/unidades/${id}`, { method: "DELETE" });
-      if (!response.ok && response.status !== 204) {
-        throw new Error((await response.json()).detail ?? "Error al eliminar la unidad");
-      }
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["unidades"] }),
     onError: (e: Error) => setError(e.message),
   });
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const payload = toPayload(form);
-    if (editandoId) {
-      actualizar.mutate({ id: editandoId, payload });
-    } else {
-      crear.mutate(payload);
-    }
-  }
-
-  function editar(unidad: Unidad) {
-    setEditandoId(unidad.id);
-    setForm({
-      numero: unidad.numero,
-      torre: unidad.torre ?? "",
-      metraje: unidad.metraje ?? "",
-      numero_bodega: unidad.numero_bodega ?? "",
-      metraje_bodega: unidad.metraje_bodega ?? "",
-    });
-  }
-
-  function cancelarEdicion() {
-    setEditandoId(null);
-    setForm(FORM_INICIAL);
-    setError(null);
+    crear.mutate(toPayload(form));
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-900">Unidades</h1>
+      <h1 className="text-2xl font-semibold text-slate-900">Propiedades</h1>
       <p className="mt-1 text-slate-500">Departamentos o casas del condominio.</p>
 
       <div className="mt-6">
@@ -322,18 +439,21 @@ export default function UnidadesPage() {
             className="w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Estac. Discap.</label>
+          <input
+            value={form.estacionamiento_discapacitados}
+            onChange={(e) => setForm((f) => ({ ...f, estacionamiento_discapacitados: e.target.value }))}
+            className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
         <button
           type="submit"
-          disabled={crear.isPending || actualizar.isPending}
+          disabled={crear.isPending}
           className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-60"
         >
-          {editandoId ? "Guardar cambios" : "Agregar unidad"}
+          Agregar propiedad
         </button>
-        {editandoId && (
-          <button type="button" onClick={cancelarEdicion} className="rounded-lg px-4 py-2 text-sm text-slate-500 hover:bg-slate-100">
-            Cancelar
-          </button>
-        )}
       </form>
 
       {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
@@ -347,6 +467,7 @@ export default function UnidadesPage() {
               <th className="px-5 py-3">Metraje Prop.</th>
               <th className="px-5 py-3">N° Bodega</th>
               <th className="px-5 py-3">Metraje Bodega</th>
+              <th className="px-5 py-3">Estac. Discap.</th>
               <th className="px-5 py-3">Residentes</th>
               <th className="px-5 py-3" />
             </tr>
@@ -354,36 +475,16 @@ export default function UnidadesPage() {
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={7} className="px-5 py-6 text-center text-slate-400">Cargando...</td>
+                <td colSpan={8} className="px-5 py-6 text-center text-slate-400">Cargando...</td>
               </tr>
             )}
             {!isLoading && unidades?.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-5 py-6 text-center text-slate-400">Sin unidades registradas todavía.</td>
+                <td colSpan={8} className="px-5 py-6 text-center text-slate-400">Sin propiedades registradas todavía.</td>
               </tr>
             )}
             {unidades?.map((u) => (
-              <tr key={u.id} className="border-t border-slate-100">
-                <td className="px-5 py-3 font-medium text-slate-900">{u.numero}</td>
-                <td className="px-5 py-3 text-slate-600">{u.torre ?? "—"}</td>
-                <td className="px-5 py-3 text-slate-600">{u.metraje ? `${u.metraje} m²` : "—"}</td>
-                <td className="px-5 py-3 text-slate-600">{u.numero_bodega ?? "—"}</td>
-                <td className="px-5 py-3 text-slate-600">{u.metraje_bodega ? `${u.metraje_bodega} m²` : "—"}</td>
-                <td className="px-5 py-3 text-slate-600">{u.total_residentes}</td>
-                <td className="px-5 py-3 text-right">
-                  <button onClick={() => editar(u)} className="mr-3 text-slate-500 hover:text-slate-900">
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm(`¿Eliminar la unidad ${u.numero}?`)) eliminar.mutate(u.id);
-                    }}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
+              <FilaPropiedad key={u.id} propiedad={u} actualizar={actualizar} eliminar={eliminar} />
             ))}
           </tbody>
         </table>

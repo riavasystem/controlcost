@@ -12,7 +12,7 @@ async function fetchResidentes(): Promise<Residente[]> {
 
 async function fetchUnidades(): Promise<Unidad[]> {
   const response = await fetch("/api/unidades");
-  if (!response.ok) throw new Error("No se pudieron cargar las unidades");
+  if (!response.ok) throw new Error("No se pudieron cargar las propiedades");
   return response.json();
 }
 
@@ -37,27 +37,221 @@ const FORM_INICIAL: FormState = {
   tipo: "propietario",
 };
 
+function toPayload(f: FormState) {
+  return {
+    unidad_id: f.unidad_id,
+    nombre: f.nombre,
+    apellido: f.apellido || null,
+    rut: f.rut || null,
+    telefono: f.telefono || null,
+    email: f.email || null,
+    numero_estacionamiento: f.numero_estacionamiento || null,
+    tipo: f.tipo,
+  };
+}
+
+function camposDesdeResidente(residente: Residente): FormState {
+  return {
+    unidad_id: residente.unidad_id,
+    nombre: residente.nombre,
+    apellido: residente.apellido ?? "",
+    rut: residente.rut ?? "",
+    telefono: residente.telefono ?? "",
+    email: residente.email ?? "",
+    numero_estacionamiento: residente.numero_estacionamiento ?? "",
+    tipo: residente.tipo,
+  };
+}
+
+function useActualizarResidente(queryClient: ReturnType<typeof useQueryClient>, setError: (e: string | null) => void) {
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: ReturnType<typeof toPayload> }) => {
+      const response = await fetch(`/api/residentes/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error((await response.json()).detail ?? "Error al actualizar el residente");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["residentes"] });
+      setError(null);
+    },
+    onError: (e: Error) => setError(e.message),
+  });
+}
+
+function useEliminarResidente(queryClient: ReturnType<typeof useQueryClient>, setError: (e: string | null) => void) {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/residentes/${id}`, { method: "DELETE" });
+      if (!response.ok && response.status !== 204) {
+        throw new Error((await response.json()).detail ?? "Error al eliminar el residente");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["residentes"] });
+      queryClient.invalidateQueries({ queryKey: ["unidades"] });
+    },
+    onError: (e: Error) => setError(e.message),
+  });
+}
+
+function FilaResidente({
+  residente,
+  unidades,
+  actualizar,
+  eliminar,
+}: {
+  residente: Residente;
+  unidades: Unidad[] | undefined;
+  actualizar: ReturnType<typeof useActualizarResidente>;
+  eliminar: ReturnType<typeof useEliminarResidente>;
+}) {
+  const [editando, setEditando] = useState(false);
+  const [campos, setCampos] = useState<FormState>(camposDesdeResidente(residente));
+
+  function cancelar() {
+    setEditando(false);
+    setCampos(camposDesdeResidente(residente));
+  }
+
+  function guardar() {
+    actualizar.mutate({ id: residente.id, payload: toPayload(campos) }, { onSuccess: () => setEditando(false) });
+  }
+
+  if (!editando) {
+    return (
+      <tr className="border-t border-slate-100">
+        <td className="px-5 py-3 font-medium text-slate-900">{residente.nombre}</td>
+        <td className="px-5 py-3 text-slate-600">{residente.apellido ?? "—"}</td>
+        <td className="px-5 py-3 text-slate-600">
+          {residente.unidad_torre ? `${residente.unidad_torre} - ` : ""}
+          {residente.unidad_numero ?? "—"}
+        </td>
+        <td className="px-5 py-3 text-slate-600">{residente.rut ?? "—"}</td>
+        <td className="px-5 py-3 text-slate-600">{residente.telefono ?? "—"}</td>
+        <td className="px-5 py-3 text-slate-600">{residente.email ?? "—"}</td>
+        <td className="px-5 py-3 text-slate-600">{residente.numero_estacionamiento ?? "—"}</td>
+        <td className="px-5 py-3 text-slate-600">{residente.unidad_numero_bodega ?? "—"}</td>
+        <td className="px-5 py-3 text-slate-600 capitalize">{residente.tipo}</td>
+        <td className="px-5 py-3 text-right">
+          <button onClick={() => setEditando(true)} className="mr-3 text-slate-500 hover:text-slate-900">
+            Editar
+          </button>
+          <button
+            onClick={() => {
+              if (confirm(`¿Eliminar a ${residente.nombre}?`)) eliminar.mutate(residente.id);
+            }}
+            className="text-red-500 hover:text-red-700"
+          >
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    );
+  }
+
+  const bodegaUnidad = unidades?.find((u) => u.id === campos.unidad_id)?.numero_bodega ?? "—";
+
+  return (
+    <tr className="border-t border-slate-100 bg-slate-50">
+      <td className="px-3 py-2">
+        <input
+          value={campos.nombre}
+          onChange={(e) => setCampos((c) => ({ ...c, nombre: e.target.value }))}
+          className="w-28 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2">
+        <input
+          value={campos.apellido}
+          onChange={(e) => setCampos((c) => ({ ...c, apellido: e.target.value }))}
+          className="w-28 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2">
+        <select
+          value={campos.unidad_id}
+          onChange={(e) => setCampos((c) => ({ ...c, unidad_id: e.target.value }))}
+          className="w-28 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        >
+          {unidades?.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.torre ? `${u.torre} - ` : ""}
+              {u.numero}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-[11px] text-slate-400">Bodega: {bodegaUnidad}</p>
+      </td>
+      <td className="px-3 py-2">
+        <input
+          value={campos.rut}
+          onChange={(e) => setCampos((c) => ({ ...c, rut: e.target.value }))}
+          className="w-24 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2">
+        <input
+          value={campos.telefono}
+          onChange={(e) => setCampos((c) => ({ ...c, telefono: e.target.value }))}
+          className="w-28 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2">
+        <input
+          type="email"
+          value={campos.email}
+          onChange={(e) => setCampos((c) => ({ ...c, email: e.target.value }))}
+          className="w-40 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2">
+        <input
+          value={campos.numero_estacionamiento}
+          onChange={(e) => setCampos((c) => ({ ...c, numero_estacionamiento: e.target.value }))}
+          className="w-24 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-5 py-3 text-slate-600">{residente.unidad_numero_bodega ?? "—"}</td>
+      <td className="px-3 py-2">
+        <select
+          value={campos.tipo}
+          onChange={(e) => setCampos((c) => ({ ...c, tipo: e.target.value as TipoResidente }))}
+          className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        >
+          <option value="propietario">Propietario</option>
+          <option value="arrendatario">Arrendatario</option>
+        </select>
+      </td>
+      <td className="px-3 py-2 text-right">
+        <button
+          onClick={guardar}
+          disabled={actualizar.isPending}
+          className="mr-3 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-60"
+        >
+          Guardar
+        </button>
+        <button onClick={cancelar} className="text-xs text-slate-500 hover:text-slate-900">
+          Cancelar
+        </button>
+      </td>
+    </tr>
+  );
+}
+
 export default function ResidentesPage() {
   const queryClient = useQueryClient();
   const { data: residentes, isLoading } = useQuery({ queryKey: ["residentes"], queryFn: fetchResidentes });
   const { data: unidades } = useQuery({ queryKey: ["unidades"], queryFn: fetchUnidades });
 
   const [form, setForm] = useState<FormState>(FORM_INICIAL);
-  const [editandoId, setEditandoId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  function toPayload(f: FormState) {
-    return {
-      unidad_id: f.unidad_id,
-      nombre: f.nombre,
-      apellido: f.apellido || null,
-      rut: f.rut || null,
-      telefono: f.telefono || null,
-      email: f.email || null,
-      numero_estacionamiento: f.numero_estacionamiento || null,
-      tipo: f.tipo,
-    };
-  }
+  const actualizar = useActualizarResidente(queryClient, setError);
+  const eliminar = useEliminarResidente(queryClient, setError);
 
   const crear = useMutation({
     mutationFn: async (payload: ReturnType<typeof toPayload>) => {
@@ -78,81 +272,23 @@ export default function ResidentesPage() {
     onError: (e: Error) => setError(e.message),
   });
 
-  const actualizar = useMutation({
-    mutationFn: async ({ id, payload }: { id: string; payload: ReturnType<typeof toPayload> }) => {
-      const response = await fetch(`/api/residentes/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) throw new Error((await response.json()).detail ?? "Error al actualizar el residente");
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["residentes"] });
-      setForm(FORM_INICIAL);
-      setEditandoId(null);
-      setError(null);
-    },
-    onError: (e: Error) => setError(e.message),
-  });
-
-  const eliminar = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`/api/residentes/${id}`, { method: "DELETE" });
-      if (!response.ok && response.status !== 204) {
-        throw new Error((await response.json()).detail ?? "Error al eliminar el residente");
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["residentes"] });
-      queryClient.invalidateQueries({ queryKey: ["unidades"] });
-    },
-    onError: (e: Error) => setError(e.message),
-  });
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.unidad_id) {
-      setError("Selecciona una unidad");
+      setError("Selecciona una propiedad");
       return;
     }
-    const payload = toPayload(form);
-    if (editandoId) {
-      actualizar.mutate({ id: editandoId, payload });
-    } else {
-      crear.mutate(payload);
-    }
-  }
-
-  function editar(residente: Residente) {
-    setEditandoId(residente.id);
-    setForm({
-      unidad_id: residente.unidad_id,
-      nombre: residente.nombre,
-      apellido: residente.apellido ?? "",
-      rut: residente.rut ?? "",
-      telefono: residente.telefono ?? "",
-      email: residente.email ?? "",
-      numero_estacionamiento: residente.numero_estacionamiento ?? "",
-      tipo: residente.tipo,
-    });
-  }
-
-  function cancelarEdicion() {
-    setEditandoId(null);
-    setForm(FORM_INICIAL);
-    setError(null);
+    crear.mutate(toPayload(form));
   }
 
   return (
     <div>
       <h1 className="text-2xl font-semibold text-slate-900">Residentes</h1>
-      <p className="mt-1 text-slate-500">Personas asociadas a una unidad del condominio.</p>
+      <p className="mt-1 text-slate-500">Personas asociadas a una propiedad del condominio.</p>
 
       <form onSubmit={handleSubmit} className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-5">
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Unidad</label>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Propiedad</label>
           <select
             required
             value={form.unidad_id}
@@ -213,7 +349,7 @@ export default function ResidentesPage() {
             type="email"
             value={form.email}
             onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-            placeholder="para enviar el gasto común"
+            placeholder="para enviar información"
             className="w-52 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
@@ -238,16 +374,11 @@ export default function ResidentesPage() {
         </div>
         <button
           type="submit"
-          disabled={crear.isPending || actualizar.isPending}
+          disabled={crear.isPending}
           className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-60"
         >
-          {editandoId ? "Guardar cambios" : "Agregar residente"}
+          Agregar residente
         </button>
-        {editandoId && (
-          <button type="button" onClick={cancelarEdicion} className="rounded-lg px-4 py-2 text-sm text-slate-500 hover:bg-slate-100">
-            Cancelar
-          </button>
-        )}
       </form>
 
       {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
@@ -258,7 +389,7 @@ export default function ResidentesPage() {
             <tr>
               <th className="px-5 py-3">Nombre</th>
               <th className="px-5 py-3">Apellido</th>
-              <th className="px-5 py-3">Unidad</th>
+              <th className="px-5 py-3">Propiedad</th>
               <th className="px-5 py-3">RUT</th>
               <th className="px-5 py-3">Teléfono</th>
               <th className="px-5 py-3">Correo</th>
@@ -280,33 +411,7 @@ export default function ResidentesPage() {
               </tr>
             )}
             {residentes?.map((r) => (
-              <tr key={r.id} className="border-t border-slate-100">
-                <td className="px-5 py-3 font-medium text-slate-900">{r.nombre}</td>
-                <td className="px-5 py-3 text-slate-600">{r.apellido ?? "—"}</td>
-                <td className="px-5 py-3 text-slate-600">
-                  {r.unidad_torre ? `${r.unidad_torre} - ` : ""}
-                  {r.unidad_numero ?? "—"}
-                </td>
-                <td className="px-5 py-3 text-slate-600">{r.rut ?? "—"}</td>
-                <td className="px-5 py-3 text-slate-600">{r.telefono ?? "—"}</td>
-                <td className="px-5 py-3 text-slate-600">{r.email ?? "—"}</td>
-                <td className="px-5 py-3 text-slate-600">{r.numero_estacionamiento ?? "—"}</td>
-                <td className="px-5 py-3 text-slate-600">{r.unidad_numero_bodega ?? "—"}</td>
-                <td className="px-5 py-3 text-slate-600 capitalize">{r.tipo}</td>
-                <td className="px-5 py-3 text-right">
-                  <button onClick={() => editar(r)} className="mr-3 text-slate-500 hover:text-slate-900">
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm(`¿Eliminar a ${r.nombre}?`)) eliminar.mutate(r.id);
-                    }}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
+              <FilaResidente key={r.id} residente={r} unidades={unidades} actualizar={actualizar} eliminar={eliminar} />
             ))}
           </tbody>
         </table>

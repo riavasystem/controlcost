@@ -35,23 +35,176 @@ const FORM_INICIAL: FormState = {
   hora_fin: "20:00",
 };
 
+function toPayload(f: FormState) {
+  return {
+    nombre_guardia: f.nombre_guardia,
+    telefono: f.telefono || null,
+    dia_semana: f.dia_semana,
+    hora_inicio: f.hora_inicio,
+    hora_fin: f.hora_fin,
+  };
+}
+
+function camposDesdeTurno(t: TurnoGuardia): FormState {
+  return {
+    nombre_guardia: t.nombre_guardia,
+    telefono: t.telefono ?? "",
+    dia_semana: t.dia_semana,
+    hora_inicio: t.hora_inicio.slice(0, 5),
+    hora_fin: t.hora_fin.slice(0, 5),
+  };
+}
+
+function useActualizarTurno(queryClient: ReturnType<typeof useQueryClient>, setError: (e: string | null) => void) {
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: ReturnType<typeof toPayload> }) => {
+      const response = await fetch(`/api/guardias/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error((await response.json()).detail ?? "Error al actualizar el turno");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["guardias"] });
+      setError(null);
+    },
+    onError: (e: Error) => setError(e.message),
+  });
+}
+
+function useEliminarTurno(queryClient: ReturnType<typeof useQueryClient>, setError: (e: string | null) => void) {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/guardias/${id}`, { method: "DELETE" });
+      if (!response.ok && response.status !== 204) {
+        throw new Error((await response.json()).detail ?? "Error al eliminar el turno");
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["guardias"] }),
+    onError: (e: Error) => setError(e.message),
+  });
+}
+
+function FilaTurno({
+  turno,
+  actualizar,
+  eliminar,
+}: {
+  turno: TurnoGuardia;
+  actualizar: ReturnType<typeof useActualizarTurno>;
+  eliminar: ReturnType<typeof useEliminarTurno>;
+}) {
+  const [editando, setEditando] = useState(false);
+  const [campos, setCampos] = useState<FormState>(camposDesdeTurno(turno));
+
+  function cancelar() {
+    setEditando(false);
+    setCampos(camposDesdeTurno(turno));
+  }
+
+  function guardar() {
+    actualizar.mutate({ id: turno.id, payload: toPayload(campos) }, { onSuccess: () => setEditando(false) });
+  }
+
+  if (!editando) {
+    return (
+      <tr className="border-t border-slate-100">
+        <td className="px-5 py-3 font-medium text-slate-900">{turno.nombre_guardia}</td>
+        <td className="px-5 py-3 text-slate-600 capitalize">{turno.dia_semana}</td>
+        <td className="px-5 py-3 text-slate-600">
+          {turno.hora_inicio.slice(0, 5)} – {turno.hora_fin.slice(0, 5)}
+        </td>
+        <td className="px-5 py-3 text-slate-600">{turno.telefono ?? "—"}</td>
+        <td className="px-5 py-3 text-right">
+          <button onClick={() => setEditando(true)} className="mr-3 text-slate-500 hover:text-slate-900">
+            Editar
+          </button>
+          <button
+            onClick={() => {
+              if (confirm(`¿Eliminar el turno de ${turno.nombre_guardia}?`)) eliminar.mutate(turno.id);
+            }}
+            className="text-red-500 hover:text-red-700"
+          >
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    );
+  }
+
+  return (
+    <tr className="border-t border-slate-100 bg-slate-50">
+      <td className="px-3 py-2">
+        <input
+          value={campos.nombre_guardia}
+          onChange={(e) => setCampos((c) => ({ ...c, nombre_guardia: e.target.value }))}
+          className="w-32 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2">
+        <select
+          value={campos.dia_semana}
+          onChange={(e) => setCampos((c) => ({ ...c, dia_semana: e.target.value as DiaSemana }))}
+          className="w-28 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        >
+          {DIAS.map((d) => (
+            <option key={d.value} value={d.value}>
+              {d.label}
+            </option>
+          ))}
+        </select>
+      </td>
+      <td className="px-3 py-2">
+        <div className="flex items-center gap-1">
+          <input
+            type="time"
+            value={campos.hora_inicio}
+            onChange={(e) => setCampos((c) => ({ ...c, hora_inicio: e.target.value }))}
+            className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+          />
+          <span className="text-slate-400">–</span>
+          <input
+            type="time"
+            value={campos.hora_fin}
+            onChange={(e) => setCampos((c) => ({ ...c, hora_fin: e.target.value }))}
+            className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+          />
+        </div>
+      </td>
+      <td className="px-3 py-2">
+        <input
+          value={campos.telefono}
+          onChange={(e) => setCampos((c) => ({ ...c, telefono: e.target.value }))}
+          className="w-28 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2 text-right">
+        <button
+          onClick={guardar}
+          disabled={actualizar.isPending}
+          className="mr-3 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-60"
+        >
+          Guardar
+        </button>
+        <button onClick={cancelar} className="text-xs text-slate-500 hover:text-slate-900">
+          Cancelar
+        </button>
+      </td>
+    </tr>
+  );
+}
+
 export default function GuardiasPage() {
   const queryClient = useQueryClient();
   const { data: turnos, isLoading } = useQuery({ queryKey: ["guardias"], queryFn: fetchTurnos });
 
   const [form, setForm] = useState<FormState>(FORM_INICIAL);
-  const [editandoId, setEditandoId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  function toPayload(f: FormState) {
-    return {
-      nombre_guardia: f.nombre_guardia,
-      telefono: f.telefono || null,
-      dia_semana: f.dia_semana,
-      hora_inicio: f.hora_inicio,
-      hora_fin: f.hora_fin,
-    };
-  }
+  const actualizar = useActualizarTurno(queryClient, setError);
+  const eliminar = useEliminarTurno(queryClient, setError);
 
   const crear = useMutation({
     mutationFn: async (payload: ReturnType<typeof toPayload>) => {
@@ -71,61 +224,9 @@ export default function GuardiasPage() {
     onError: (e: Error) => setError(e.message),
   });
 
-  const actualizar = useMutation({
-    mutationFn: async ({ id, payload }: { id: string; payload: ReturnType<typeof toPayload> }) => {
-      const response = await fetch(`/api/guardias/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) throw new Error((await response.json()).detail ?? "Error al actualizar el turno");
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["guardias"] });
-      setForm(FORM_INICIAL);
-      setEditandoId(null);
-      setError(null);
-    },
-    onError: (e: Error) => setError(e.message),
-  });
-
-  const eliminar = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`/api/guardias/${id}`, { method: "DELETE" });
-      if (!response.ok && response.status !== 204) {
-        throw new Error((await response.json()).detail ?? "Error al eliminar el turno");
-      }
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["guardias"] }),
-    onError: (e: Error) => setError(e.message),
-  });
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const payload = toPayload(form);
-    if (editandoId) {
-      actualizar.mutate({ id: editandoId, payload });
-    } else {
-      crear.mutate(payload);
-    }
-  }
-
-  function editar(t: TurnoGuardia) {
-    setEditandoId(t.id);
-    setForm({
-      nombre_guardia: t.nombre_guardia,
-      telefono: t.telefono ?? "",
-      dia_semana: t.dia_semana,
-      hora_inicio: t.hora_inicio.slice(0, 5),
-      hora_fin: t.hora_fin.slice(0, 5),
-    });
-  }
-
-  function cancelarEdicion() {
-    setEditandoId(null);
-    setForm(FORM_INICIAL);
-    setError(null);
+    crear.mutate(toPayload(form));
   }
 
   return (
@@ -190,20 +291,11 @@ export default function GuardiasPage() {
         </div>
         <button
           type="submit"
-          disabled={crear.isPending || actualizar.isPending}
+          disabled={crear.isPending}
           className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-60"
         >
-          {editandoId ? "Guardar cambios" : "Agregar turno"}
+          Agregar turno
         </button>
-        {editandoId && (
-          <button
-            type="button"
-            onClick={cancelarEdicion}
-            className="rounded-lg px-4 py-2 text-sm text-slate-500 hover:bg-slate-100"
-          >
-            Cancelar
-          </button>
-        )}
       </form>
 
       {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
@@ -235,27 +327,7 @@ export default function GuardiasPage() {
               </tr>
             )}
             {turnos?.map((t) => (
-              <tr key={t.id} className="border-t border-slate-100">
-                <td className="px-5 py-3 font-medium text-slate-900">{t.nombre_guardia}</td>
-                <td className="px-5 py-3 text-slate-600 capitalize">{t.dia_semana}</td>
-                <td className="px-5 py-3 text-slate-600">
-                  {t.hora_inicio.slice(0, 5)} – {t.hora_fin.slice(0, 5)}
-                </td>
-                <td className="px-5 py-3 text-slate-600">{t.telefono ?? "—"}</td>
-                <td className="px-5 py-3 text-right">
-                  <button onClick={() => editar(t)} className="mr-3 text-slate-500 hover:text-slate-900">
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm(`¿Eliminar el turno de ${t.nombre_guardia}?`)) eliminar.mutate(t.id);
-                    }}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
+              <FilaTurno key={t.id} turno={t} actualizar={actualizar} eliminar={eliminar} />
             ))}
           </tbody>
         </table>

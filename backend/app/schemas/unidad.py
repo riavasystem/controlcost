@@ -10,6 +10,7 @@ class UnidadBase(BaseModel):
     metraje: Decimal | None = Field(default=None, gt=0)
     numero_bodega: str | None = Field(default=None, max_length=50)
     metraje_bodega: Decimal | None = Field(default=None, gt=0)
+    estacionamiento_discapacitados: str | None = Field(default=None, max_length=50)
 
 
 class UnidadCreate(UnidadBase):

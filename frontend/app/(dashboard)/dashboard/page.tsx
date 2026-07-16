@@ -52,7 +52,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <p className="text-sm text-slate-500">Unidades</p>
+          <p className="text-sm text-slate-500">Propiedades</p>
           <p className="mt-2 text-2xl font-semibold text-slate-900">{unidades?.length ?? "—"}</p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5">

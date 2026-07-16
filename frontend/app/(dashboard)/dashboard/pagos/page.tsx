@@ -108,7 +108,7 @@ export default function PagosPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>
-                  <th className="px-4 py-3">Unidad</th>
+                  <th className="px-4 py-3">Propiedad</th>
                   <th className="px-4 py-3">Período</th>
                   <th className="px-4 py-3">Monto</th>
                   <th className="px-4 py-3" />
@@ -205,7 +205,7 @@ export default function PagosPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>
-                  <th className="px-4 py-3">Unidad</th>
+                  <th className="px-4 py-3">Propiedad</th>
                   <th className="px-4 py-3">Monto</th>
                   <th className="px-4 py-3">Método</th>
                   <th className="px-4 py-3">Fecha</th>

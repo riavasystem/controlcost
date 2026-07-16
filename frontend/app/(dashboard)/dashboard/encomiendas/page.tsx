@@ -84,7 +84,7 @@ export default function EncomiendasPage() {
         className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-5"
       >
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Unidad destino</label>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Propiedad destino</label>
           <select
             required
             value={form.unidad_id}
@@ -127,7 +127,7 @@ export default function EncomiendasPage() {
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-50 text-xs uppercase text-slate-500">
             <tr>
-              <th className="px-5 py-3">Unidad</th>
+              <th className="px-5 py-3">Propiedad</th>
               <th className="px-5 py-3">Descripción</th>
               <th className="px-5 py-3">Llegada</th>
               <th className="px-5 py-3">Estado</th>

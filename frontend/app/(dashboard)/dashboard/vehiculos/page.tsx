@@ -13,6 +13,172 @@ async function fetchJson<T>(url: string): Promise<T> {
 type FormState = { unidad_id: string; patente: string; marca: string; modelo: string; color: string };
 const FORM_INICIAL: FormState = { unidad_id: "", patente: "", marca: "", modelo: "", color: "" };
 
+function toPayload(f: FormState) {
+  return {
+    unidad_id: f.unidad_id,
+    patente: f.patente,
+    marca: f.marca || null,
+    modelo: f.modelo || null,
+    color: f.color || null,
+  };
+}
+
+function camposDesdeVehiculo(v: Vehiculo): FormState {
+  return {
+    unidad_id: v.unidad_id,
+    patente: v.patente,
+    marca: v.marca ?? "",
+    modelo: v.modelo ?? "",
+    color: v.color ?? "",
+  };
+}
+
+function useActualizarVehiculo(queryClient: ReturnType<typeof useQueryClient>, setError: (e: string | null) => void) {
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: ReturnType<typeof toPayload> }) => {
+      const response = await fetch(`/api/vehiculos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error((await response.json()).detail ?? "Error al actualizar el vehículo");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vehiculos"] });
+      setError(null);
+    },
+    onError: (e: Error) => setError(e.message),
+  });
+}
+
+function useEliminarVehiculo(queryClient: ReturnType<typeof useQueryClient>, setError: (e: string | null) => void) {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/vehiculos/${id}`, { method: "DELETE" });
+      if (!response.ok && response.status !== 204) {
+        throw new Error((await response.json()).detail ?? "Error al eliminar el vehículo");
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vehiculos"] }),
+    onError: (e: Error) => setError(e.message),
+  });
+}
+
+function FilaVehiculo({
+  vehiculo,
+  unidades,
+  actualizar,
+  eliminar,
+}: {
+  vehiculo: Vehiculo;
+  unidades: Unidad[] | undefined;
+  actualizar: ReturnType<typeof useActualizarVehiculo>;
+  eliminar: ReturnType<typeof useEliminarVehiculo>;
+}) {
+  const [editando, setEditando] = useState(false);
+  const [campos, setCampos] = useState<FormState>(camposDesdeVehiculo(vehiculo));
+
+  function cancelar() {
+    setEditando(false);
+    setCampos(camposDesdeVehiculo(vehiculo));
+  }
+
+  function guardar() {
+    actualizar.mutate({ id: vehiculo.id, payload: toPayload(campos) }, { onSuccess: () => setEditando(false) });
+  }
+
+  if (!editando) {
+    return (
+      <tr className="border-t border-slate-100">
+        <td className="px-5 py-3 font-medium text-slate-900">{vehiculo.patente}</td>
+        <td className="px-5 py-3 text-slate-600">
+          {vehiculo.unidad_numero}
+          {vehiculo.unidad_torre ? ` (${vehiculo.unidad_torre})` : ""}
+        </td>
+        <td className="px-5 py-3 text-slate-600">
+          {[vehiculo.marca, vehiculo.modelo].filter(Boolean).join(" ") || "—"}
+        </td>
+        <td className="px-5 py-3 text-slate-600">{vehiculo.color ?? "—"}</td>
+        <td className="px-5 py-3 text-right">
+          <button onClick={() => setEditando(true)} className="mr-3 text-slate-500 hover:text-slate-900">
+            Editar
+          </button>
+          <button
+            onClick={() => {
+              if (confirm(`¿Eliminar el vehículo ${vehiculo.patente}?`)) eliminar.mutate(vehiculo.id);
+            }}
+            className="text-red-500 hover:text-red-700"
+          >
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    );
+  }
+
+  return (
+    <tr className="border-t border-slate-100 bg-slate-50">
+      <td className="px-3 py-2">
+        <input
+          value={campos.patente}
+          onChange={(e) => setCampos((c) => ({ ...c, patente: e.target.value.toUpperCase() }))}
+          className="w-24 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2">
+        <select
+          value={campos.unidad_id}
+          onChange={(e) => setCampos((c) => ({ ...c, unidad_id: e.target.value }))}
+          className="w-28 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        >
+          {unidades?.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.numero}
+              {u.torre ? ` (${u.torre})` : ""}
+            </option>
+          ))}
+        </select>
+      </td>
+      <td className="px-3 py-2">
+        <div className="flex gap-1">
+          <input
+            value={campos.marca}
+            onChange={(e) => setCampos((c) => ({ ...c, marca: e.target.value }))}
+            placeholder="Marca"
+            className="w-20 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+          />
+          <input
+            value={campos.modelo}
+            onChange={(e) => setCampos((c) => ({ ...c, modelo: e.target.value }))}
+            placeholder="Modelo"
+            className="w-20 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+          />
+        </div>
+      </td>
+      <td className="px-3 py-2">
+        <input
+          value={campos.color}
+          onChange={(e) => setCampos((c) => ({ ...c, color: e.target.value }))}
+          className="w-24 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </td>
+      <td className="px-3 py-2 text-right">
+        <button
+          onClick={guardar}
+          disabled={actualizar.isPending}
+          className="mr-3 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-60"
+        >
+          Guardar
+        </button>
+        <button onClick={cancelar} className="text-xs text-slate-500 hover:text-slate-900">
+          Cancelar
+        </button>
+      </td>
+    </tr>
+  );
+}
+
 export default function VehiculosPage() {
   const queryClient = useQueryClient();
   const { data: unidades } = useQuery({ queryKey: ["unidades"], queryFn: () => fetchJson<Unidad[]>("/api/unidades") });
@@ -22,18 +188,10 @@ export default function VehiculosPage() {
   });
 
   const [form, setForm] = useState<FormState>(FORM_INICIAL);
-  const [editandoId, setEditandoId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  function toPayload(f: FormState) {
-    return {
-      unidad_id: f.unidad_id,
-      patente: f.patente,
-      marca: f.marca || null,
-      modelo: f.modelo || null,
-      color: f.color || null,
-    };
-  }
+  const actualizar = useActualizarVehiculo(queryClient, setError);
+  const eliminar = useEliminarVehiculo(queryClient, setError);
 
   const crear = useMutation({
     mutationFn: async (payload: ReturnType<typeof toPayload>) => {
@@ -53,74 +211,22 @@ export default function VehiculosPage() {
     onError: (e: Error) => setError(e.message),
   });
 
-  const actualizar = useMutation({
-    mutationFn: async ({ id, payload }: { id: string; payload: ReturnType<typeof toPayload> }) => {
-      const response = await fetch(`/api/vehiculos/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) throw new Error((await response.json()).detail ?? "Error al actualizar el vehículo");
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["vehiculos"] });
-      setForm(FORM_INICIAL);
-      setEditandoId(null);
-      setError(null);
-    },
-    onError: (e: Error) => setError(e.message),
-  });
-
-  const eliminar = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`/api/vehiculos/${id}`, { method: "DELETE" });
-      if (!response.ok && response.status !== 204) {
-        throw new Error((await response.json()).detail ?? "Error al eliminar el vehículo");
-      }
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vehiculos"] }),
-    onError: (e: Error) => setError(e.message),
-  });
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const payload = toPayload(form);
-    if (editandoId) {
-      actualizar.mutate({ id: editandoId, payload });
-    } else {
-      crear.mutate(payload);
-    }
-  }
-
-  function editar(v: Vehiculo) {
-    setEditandoId(v.id);
-    setForm({
-      unidad_id: v.unidad_id,
-      patente: v.patente,
-      marca: v.marca ?? "",
-      modelo: v.modelo ?? "",
-      color: v.color ?? "",
-    });
-  }
-
-  function cancelarEdicion() {
-    setEditandoId(null);
-    setForm(FORM_INICIAL);
-    setError(null);
+    crear.mutate(toPayload(form));
   }
 
   return (
     <div>
       <h1 className="text-2xl font-semibold text-slate-900">Vehículos</h1>
-      <p className="mt-1 text-slate-500">Padrón maestro de vehículos vinculado a cada unidad.</p>
+      <p className="mt-1 text-slate-500">Padrón maestro de vehículos vinculado a cada propiedad.</p>
 
       <form
         onSubmit={handleSubmit}
         className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-5"
       >
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Unidad</label>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Propiedad</label>
           <select
             required
             value={form.unidad_id}
@@ -173,20 +279,11 @@ export default function VehiculosPage() {
         </div>
         <button
           type="submit"
-          disabled={crear.isPending || actualizar.isPending}
+          disabled={crear.isPending}
           className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-60"
         >
-          {editandoId ? "Guardar cambios" : "Agregar vehículo"}
+          Agregar vehículo
         </button>
-        {editandoId && (
-          <button
-            type="button"
-            onClick={cancelarEdicion}
-            className="rounded-lg px-4 py-2 text-sm text-slate-500 hover:bg-slate-100"
-          >
-            Cancelar
-          </button>
-        )}
       </form>
 
       {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
@@ -196,7 +293,7 @@ export default function VehiculosPage() {
           <thead className="bg-slate-50 text-xs uppercase text-slate-500">
             <tr>
               <th className="px-5 py-3">Patente</th>
-              <th className="px-5 py-3">Unidad</th>
+              <th className="px-5 py-3">Propiedad</th>
               <th className="px-5 py-3">Marca / Modelo</th>
               <th className="px-5 py-3">Color</th>
               <th className="px-5 py-3" />
@@ -218,30 +315,7 @@ export default function VehiculosPage() {
               </tr>
             )}
             {vehiculos?.map((v) => (
-              <tr key={v.id} className="border-t border-slate-100">
-                <td className="px-5 py-3 font-medium text-slate-900">{v.patente}</td>
-                <td className="px-5 py-3 text-slate-600">
-                  {v.unidad_numero}
-                  {v.unidad_torre ? ` (${v.unidad_torre})` : ""}
-                </td>
-                <td className="px-5 py-3 text-slate-600">
-                  {[v.marca, v.modelo].filter(Boolean).join(" ") || "—"}
-                </td>
-                <td className="px-5 py-3 text-slate-600">{v.color ?? "—"}</td>
-                <td className="px-5 py-3 text-right">
-                  <button onClick={() => editar(v)} className="mr-3 text-slate-500 hover:text-slate-900">
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm(`¿Eliminar el vehículo ${v.patente}?`)) eliminar.mutate(v.id);
-                    }}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
+              <FilaVehiculo key={v.id} vehiculo={v} unidades={unidades} actualizar={actualizar} eliminar={eliminar} />
             ))}
           </tbody>
         </table>

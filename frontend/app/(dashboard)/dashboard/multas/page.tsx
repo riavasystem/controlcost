@@ -97,7 +97,7 @@ export default function MultasPage() {
         className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-5"
       >
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Unidad</label>
+          <label className="mb-1 block text-xs font-medium text-slate-600">Propiedad</label>
           <select
             required
             value={form.unidad_id}
@@ -161,7 +161,7 @@ export default function MultasPage() {
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-50 text-xs uppercase text-slate-500">
             <tr>
-              <th className="px-5 py-3">Unidad</th>
+              <th className="px-5 py-3">Propiedad</th>
               <th className="px-5 py-3">Motivo</th>
               <th className="px-5 py-3">Fecha</th>
               <th className="px-5 py-3">Monto</th>

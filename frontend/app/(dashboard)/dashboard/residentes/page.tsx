@@ -165,6 +165,12 @@ export default function ResidentesPage() {
           </select>
         </div>
         <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">N° Bodega</label>
+          <div className="flex h-9 w-24 items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500">
+            {unidades?.find((u) => u.id === form.unidad_id)?.numero_bodega ?? "—"}
+          </div>
+        </div>
+        <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">Nombre</label>
           <input
             required

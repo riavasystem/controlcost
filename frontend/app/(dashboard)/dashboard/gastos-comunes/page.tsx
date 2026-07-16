@@ -4,6 +4,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import type { PeriodoGastoComun, PeriodoGastoComunDetalle, Unidad } from "@/lib/types";
 
+function InfoTooltip({ texto }: { texto: string }) {
+  return (
+    <span className="group relative inline-flex">
+      <span className="flex h-3.5 w-3.5 cursor-help items-center justify-center rounded-full bg-slate-300 text-[10px] font-bold leading-none text-white">
+        i
+      </span>
+      <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1.5 w-48 -translate-x-1/2 rounded-lg bg-slate-900 px-2.5 py-1.5 text-center text-[11px] font-normal normal-case leading-snug text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+        {texto}
+      </span>
+    </span>
+  );
+}
+
 const MESES = [
   "Enero",
   "Febrero",
@@ -219,12 +232,7 @@ export default function GastosComunesPage() {
         <div>
           <label className="mb-1 flex items-center gap-1 text-xs font-medium text-slate-600">
             Cobro Extra ($)
-            <span
-              title="Cobro puntual ej: reparación portón"
-              className="flex h-3.5 w-3.5 cursor-help items-center justify-center rounded-full bg-slate-300 text-[10px] font-bold leading-none text-white"
-            >
-              i
-            </span>
+            <InfoTooltip texto="Cobro puntual ej: reparación portón" />
           </label>
           <input
             type="number"
@@ -252,12 +260,7 @@ export default function GastosComunesPage() {
         <div>
           <label className="mb-1 flex items-center gap-1 text-xs font-medium text-slate-600">
             Considerar Bodega
-            <span
-              title="Considerar el cobro del metraje de bodega en el Gasto Común"
-              className="flex h-3.5 w-3.5 cursor-help items-center justify-center rounded-full bg-slate-300 text-[10px] font-bold leading-none text-white"
-            >
-              i
-            </span>
+            <InfoTooltip texto="Considerar el cobro del metraje de bodega en el Gasto Común" />
           </label>
           <select
             value={form.considerar_bodega}
